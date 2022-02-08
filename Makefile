@@ -1,8 +1,8 @@
-
-CFILES := *.c
+CFLAGS := -O2 -I./include
+SOURCES := ./source/*.c
 
 .PHONY: 2pacman
 
 2pacman:
-	gcc -O2 -o 2pacman $(CFILES) 
+	gcc $(CFLAGS) -o 2pacman $(SOURCES) 
 
