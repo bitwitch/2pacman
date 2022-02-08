@@ -8,13 +8,13 @@ extern SDL_Texture *spritesheet;
 extern tilemap_t *tilemap;
 
 void render(char *board, int board_size, float interp) {
-    SDL_SetRenderDrawColor(app.renderer, 96, 128, 255, 255);
+    SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
     SDL_RenderClear(app.renderer);
 
     int i, x, y;
     for (i=0; i<board_size; ++i) {
         x = i % BOARD_WIDTH;
-        y = i / BOARD_HEIGHT;
+        y = i / BOARD_WIDTH;
         SDL_Rect srcrect = hmget(tilemap, board[i]);
         int scale = 8*3;
         SDL_Rect dstrect = {.x = x*scale+15, .y = y*scale+15, .w = scale, .h = scale};
