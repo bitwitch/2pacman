@@ -5,24 +5,43 @@
 #include "stb_ds.h"
 
 extern SDL_Texture *spritesheet;
-extern tilemap_t *tilemap;
 
 void render(char *board, int board_size, float interp) {
-    SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
-    SDL_RenderClear(app.renderer);
+    SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
+    SDL_RenderClear(game.renderer);
 
+    /* render board */
     int i, x, y;
     for (i=0; i<board_size; ++i) {
         x = i % BOARD_WIDTH;
         y = i / BOARD_WIDTH;
         SDL_Rect srcrect = hmget(tilemap, board[i]);
-        int scale = 8*3;
-        SDL_Rect dstrect = {.x = x*scale+15, .y = y*scale+15, .w = scale, .h = scale};
-        SDL_RenderCopy(app.renderer, spritesheet, &srcrect, &dstrect);
+        SDL_Rect dstrect = {.x = x*TILE_RENDER_SIZE+15, .y = y*TILE_RENDER_SIZE+15, .w = TILE_RENDER_SIZE, .h = TILE_RENDER_SIZE};
+        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+        if (i == pacman.tile) {
+            SDL_SetRenderDrawColor(game.renderer, 0, 255, 0, 255);
+            SDL_RenderDrawRect(game.renderer, &dstrect);
+        }
     }
 
+    /* render entities */
+    for (int i=0; i<GHOST_COUNT; ++i) {
+        entity_t ghost = ghosts[i];
+        SDL_Rect srcrect = hmget(tilemap, ghost.c);
+        x = (int)(ghost.pos.x + 0.5) - TILE_SIZE;
+        y = (int)(ghost.pos.y + 0.5) - TILE_SIZE;
+        SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
+        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+    }
 
-    SDL_RenderPresent(app.renderer);
+    SDL_Rect srcrect = hmget(tilemap, pacman.c);
+    x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
+    y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
+    SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
+    SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+
+
+    SDL_RenderPresent(game.renderer);
 }
 
 SDL_Texture *load_texture(char *filename) {
@@ -37,8 +56,9 @@ SDL_Texture *load_texture(char *filename) {
     texture_pixels = stbi_load(filename, &texture_width, &texture_height, NULL, color_format);
 
     if(texture_pixels == NULL) {
-      SDL_Log("[ERROR] Loading image %s failed: %s", filename, stbi_failure_reason());
-      return NULL;
+        /*TODO(shaw): try to load a default texture if this one is not found*/
+        SDL_Log("[ERROR] Loading image %s failed: %s", filename, stbi_failure_reason());
+        return NULL;
     }
 
     // Set up the pixel format color masks for RGB(A) byte arrays.
@@ -82,7 +102,7 @@ SDL_Texture *load_texture(char *filename) {
       return NULL;
     }
 
-    texture = SDL_CreateTextureFromSurface(app.renderer, surface);
+    texture = SDL_CreateTextureFromSurface(game.renderer, surface);
 
     SDL_FreeSurface(surface);
     stbi_image_free(texture_pixels);
