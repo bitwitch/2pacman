@@ -3,32 +3,19 @@
 #include "globals.h"
 #include "vecs.h"
 
-bool canmove(entity_t *e) {
+bool forward_collide(entity_t *e) {
     /*check tile one ahead in travel direction*/
-    int front_tile;
-
-    if (e->dir == LEFT)
-        front_tile = e->tile-1;
-    else if (e->dir == RIGHT)
-        front_tile = e->tile+1;
-    else if (e->dir == UP)
-        front_tile = e->tile-BOARD_WIDTH;
-    else if (e->dir == DOWN)
-        front_tile = e->tile+BOARD_WIDTH;
-    else
-        assert(false && "unknown direction in canmove");
+    int front_tile = get_adjacent_tile(e->tile, e->dir);
  
     if (board[front_tile] == ' ' || board[front_tile] == '.' || board[front_tile] == '0') {
-            return true;
+            return false;
     } else {
-        v2f_t front_tile_pos = { 
-            .x = (front_tile % BOARD_WIDTH) * TILE_SIZE + 0.5f*TILE_SIZE, 
-            .y = (front_tile / BOARD_WIDTH) * TILE_SIZE + 0.5f*TILE_SIZE };
+        v2f_t front_tile_pos = get_tile_pos(front_tile);
         if (vec2f_dist(front_tile_pos, e->pos) > TILE_SIZE)
-            return true;
+            return false;
     }
 
-    return false;
+    return true;
 }
 
 void update_2pac(void) {
@@ -48,7 +35,7 @@ void update_2pac(void) {
         pacman.moving = true;
     }
 
-    if (!canmove(&pacman)) {
+    if (forward_collide(&pacman)) {
         pacman.moving = false;
         return;
     }
@@ -68,9 +55,7 @@ void update_2pac(void) {
 
 
     /* only enter a new tile when your center has crossed the center of the new tile */
-    v2f_t cur_tile_pos = { 
-        .x = (pacman.tile % BOARD_WIDTH) + 0.5f*TILE_SIZE, 
-        .y = (pacman.tile / BOARD_WIDTH) + 0.5f*TILE_SIZE };
+    v2f_t cur_tile_pos = get_tile_pos(pacman.tile);
 
     if (vec2f_dist(cur_tile_pos, pacman.pos) >= TILE_SIZE) {
         int tile_x = (int)(pacman.pos.x) / TILE_SIZE;

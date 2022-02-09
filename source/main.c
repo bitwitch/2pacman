@@ -16,9 +16,6 @@
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
-#define TICRATE 60
-#define TIME_STEP (1e6 / TICRATE) 
-
 bool quit;
 uint64_t cur_time, prev_time;
 double delta, accumulator;
@@ -92,9 +89,44 @@ void do_input(void) {
     }
 }
 
+void update_ghostmode() {
+    switch (game.ghostmode) {
+        case SCATTER: 
+            if (game.ghostmode_timer < 0) {
+                printf("CHASE MODE ACTIVATED\n");
+                /* set chase targets ???? */
+                game.ghostmode = CHASE;
+                game.ghostmode_timer = 20 * SEC_TO_USEC;
+            }
+            break;
+
+        case CHASE:   
+            if (game.ghostmode_timer < 0) {
+                printf("SCATTER MODE ACTIVATED\n");
+                set_scatter_targets();
+                game.ghostmode = SCATTER;
+                game.ghostmode_timer = 7 * SEC_TO_USEC;
+            }
+            break;
+
+        case FLEE:
+            if (game.ghostmode_timer < 0) {
+                printf("SCATTER MODE ACTIVATED\n");
+                set_scatter_targets();
+                game.ghostmode = SCATTER;
+                game.ghostmode_timer = 7 * SEC_TO_USEC;
+            }
+            break;
+
+        default:
+            assert(false && "unknown ghostmode in update_ghostmode");
+            break;
+    }
+}
 
 void update(void) {
     do_input();
+    update_ghostmode();
     update_ghosts();
     update_2pac();
 }
@@ -102,44 +134,63 @@ void update(void) {
 
 void init_entities() {
     float x,y;
+    float speed = 0.814159;
 
     x = 111.0f; y = 92.0f;
+    ghosts[BLINKY].c = 'B';
     ghosts[BLINKY].pos.x = x; 
     ghosts[BLINKY].pos.y = y;
     ghosts[BLINKY].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
-    ghosts[BLINKY].speed = 3.14159f;
-    ghosts[BLINKY].c = 'B';
+    ghosts[BLINKY].speed = speed;
+    ghosts[BLINKY].dir = LEFT;
+    ghosts[BLINKY].moving = true;
+    ghosts[BLINKY].state = NORMAL;
+    ghosts[BLINKY].scatter_target_tile = 27;
 
     x = 95.0f; y = 116.0f;
+    ghosts[INKY].c = 'I';
     ghosts[INKY].pos.x = x; 
     ghosts[INKY].pos.y = y;
     ghosts[INKY].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
-    ghosts[INKY].speed = 3.14159f;
-    ghosts[INKY].c = 'I';
+    ghosts[INKY].speed = speed;
+    ghosts[INKY].dir = UP;
+    ghosts[INKY].ghost_house_timer = 4 * SEC_TO_USEC;
+    ghosts[INKY].moving = true;
+    ghosts[INKY].state = HOUSE_PARTY;
+    ghosts[INKY].scatter_target_tile = 36*BOARD_WIDTH;
 
     x = 111.0f; y = 116.0f;
+    ghosts[PINKY].c = 'P';
     ghosts[PINKY].pos.x = x; 
     ghosts[PINKY].pos.y = y;
     ghosts[PINKY].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
-    ghosts[PINKY].speed = 3.14159f;
-    ghosts[PINKY].c = 'P';
+    ghosts[PINKY].speed = speed;
+    ghosts[PINKY].dir = UP;
+    ghosts[PINKY].ghost_house_timer = 1 * SEC_TO_USEC;
+    ghosts[PINKY].moving = true;
+    ghosts[PINKY].state = HOUSE_PARTY;
+    ghosts[PINKY].scatter_target_tile = 0;
 
     x = 127.0f; y = 116.0f;
+    ghosts[CLYDE].c = 'C';
     ghosts[CLYDE].pos.x = x; 
     ghosts[CLYDE].pos.y = y;
     ghosts[CLYDE].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
-    ghosts[CLYDE].speed = 3.14159f;
-    ghosts[CLYDE].c = 'C';
+    ghosts[CLYDE].speed = speed;
+    ghosts[CLYDE].dir = UP;
+    ghosts[CLYDE].ghost_house_timer = 7 * SEC_TO_USEC;
+    ghosts[CLYDE].moving = true;
+    ghosts[CLYDE].state = HOUSE_PARTY;
+    ghosts[CLYDE].scatter_target_tile = 36*BOARD_WIDTH + 27;
 
     x = 111.0f; y = 188.0f;
+    pacman.c = '>';
     pacman.pos.x = x;
     pacman.pos.y = y;
     pacman.tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
-    pacman.speed = 0.814159f;
+    pacman.speed = speed;
     pacman.dir = LEFT;
     pacman.moving = false;
-    pacman.c = '>';
-   
 }
 
 int main(int argc, char **argv) {
@@ -149,6 +200,10 @@ int main(int argc, char **argv) {
     init_entities();
 
     spritesheet = load_texture("../assets/spritesheet.png");
+
+    game.ghostmode = SCATTER;
+    game.ghostmode_timer = 20 * SEC_TO_USEC;
+    set_scatter_targets();
 
     quit = false;
     cur_time = 0;

@@ -51,7 +51,7 @@ void init_board(char *board) {
     memcpy(board+offset, "4____6.[s~~o [] u~~f].5____3", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "     {.[a--p ip i--d].}     ", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "     {.[]          [].}     ", BOARD_WIDTH); offset += BOARD_WIDTH;
-    memcpy(board+offset, "     {.[] lgv  bgx [].}     ", BOARD_WIDTH); offset += BOARD_WIDTH;
+    memcpy(board+offset, "     {.[] lgvnnbgx [].}     ", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "^^^^^7.ip j      k ip.8^^^^^", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "      .   j      k   .      ", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "_____6.uo j      k uo.5_____", BOARD_WIDTH); offset += BOARD_WIDTH;
@@ -119,6 +119,8 @@ void init_board(char *board) {
 
     SDL_Rect dot    = {404, 48, 8, 8};    hmput(tilemap, '.', dot);
     SDL_Rect pellet = {388, 48, 8, 8};    hmput(tilemap, '0', pellet);
+
+    SDL_Rect door = {104, 96, 8, 8};      hmput(tilemap, 'n', door);
 
     SDL_Rect blinky = {228, 64, 16, 16};  hmput(tilemap, 'B', blinky);
     SDL_Rect pinky  = {228, 80, 16, 16};  hmput(tilemap, 'P', pinky);

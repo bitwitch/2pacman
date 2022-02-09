@@ -2,5 +2,6 @@
 #define GHOSTS_H
 
 void update_ghosts(void);
+void set_scatter_targets(void);
 
 #endif
