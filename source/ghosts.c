@@ -38,8 +38,8 @@ void move_towards_target(entity_t *e) {
     /* only enter a new tile when your center has crossed the center of the new tile */
     v2f_t cur_tile_pos = get_tile_pos(e->tile);
     if (vec2f_dist(cur_tile_pos, e->pos) >= TILE_SIZE) {
-        int tile_x = (int)(e->pos.x) / TILE_SIZE;
-        int tile_y = (int)(e->pos.y) / TILE_SIZE;
+        int tile_x = (int)(e->pos.x + 0.5f) / TILE_SIZE;
+        int tile_y = (int)(e->pos.y + 0.5f) / TILE_SIZE;
         int next_tile = tile_y * BOARD_WIDTH + tile_x;
         e->tile = next_tile;
 
