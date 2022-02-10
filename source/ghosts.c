@@ -91,13 +91,13 @@ static void update_single_ghost(entity_t *e) {
     switch (e->state) {
         case HOUSE_PARTY:
             ghost_hover(e);
-            if (e->ghost_house_timer - (uint64_t)TIME_STEP > e->ghost_house_timer) {
+            if (e->ghost_house_timer - TIME_STEP < 0) {
                 e->ghost_house_timer = 0;
                 e->state = EXIT_HOUSE;
                 e->target_tile = GHOST_HOUSE_EXIT_TILE;
                 printf("EXITING HOUSE\n");
             } else {
-                e->ghost_house_timer -= (uint64_t)TIME_STEP;
+                e->ghost_house_timer -= TIME_STEP;
             }
             break;
 

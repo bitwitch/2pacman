@@ -16,7 +16,6 @@
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 
-bool quit;
 uint64_t cur_time, prev_time;
 double delta, accumulator;
 
@@ -57,7 +56,7 @@ void do_input(void) {
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
-            quit = true;
+            game.quit = true;
             break;
 
         case SDL_KEYDOWN:
@@ -89,30 +88,89 @@ void do_input(void) {
     }
 }
 
+
+void set_ghostmode_timer() {
+    static float phases[3][8] = {
+       {7,20,7,20,5,20,5,-1},
+       {7,20,7,20,5,1033,1/60,-1},
+       {5,20,5,20,5,1037,1/60,-1},
+    };
+
+    if (game.phase > 8) {
+        printf("[WARNING] Game phase %d is greater than 7 and set_ghostmode_timer was called. There are only 8 phases.\n", game.phase);
+        return;
+    }
+
+    if (game.level == 1)
+        game.ghostmode_timer = phases[0][game.phase] * SEC_TO_USEC;
+    else if (game.level < 5)
+        game.ghostmode_timer = phases[1][game.phase] * SEC_TO_USEC;
+    else 
+        game.ghostmode_timer = phases[2][game.phase] * SEC_TO_USEC;
+}
+
+/*
+   Level 1
+   Phase1. scatter for 7s
+   Phase2. chase for 20s
+   Phase3. scatter for 7s
+   Phase4. chase for 20s
+   Phase5. scatter for 5s
+   Phase6. chase for 20s
+   Phase7. scatter for 5s
+   Phase8. chase forever
+
+   Levels 2-4
+   Phase1. scatter for 7s
+   Phase2. chase for 20s
+   Phase3. scatter for 7s
+   Phase4. chase for 20s
+   Phase5. scatter for 5s
+   Phase6. chase for 1033s
+   Phase7. scatter for .0166s
+   Phase8. chase forever
+
+   Levels 5+
+   Phase1. scatter for 5s
+   Phase2. chase for 20s
+   Phase2. scatter for 5s
+   Phase2. chase for 20s
+   Phase3. scatter for 5s
+   Phase2. chase for 1037s
+   Phase7. scatter for .0166s
+   Phase8. chase forever
+*/
 void update_ghostmode() {
+    game.phase_last_tic = game.phase;
     switch (game.ghostmode) {
         case SCATTER: 
+            game.ghostmode_timer -= TIME_STEP;
             if (game.ghostmode_timer < 0) {
-                printf("CHASE MODE ACTIVATED\n");
+                game.prev_phase = game.phase++;
                 /* set chase targets ???? */
                 game.ghostmode = CHASE;
-                game.ghostmode_timer = 20 * SEC_TO_USEC;
+                printf("[INFO] Chase mode activated\n");
+                set_ghostmode_timer();
             }
             break;
 
         case CHASE:   
-            if (game.ghostmode_timer < 0) {
-                printf("SCATTER MODE ACTIVATED\n");
+            game.ghostmode_timer -= TIME_STEP;
+            if (game.ghostmode_timer < 0 && game.phase < 7) {
+                game.prev_phase = game.phase++;
                 set_scatter_targets();
                 game.ghostmode = SCATTER;
-                game.ghostmode_timer = 7 * SEC_TO_USEC;
+                printf("[INFO] Scatter mode activated\n");
+                set_ghostmode_timer();
             }
             break;
 
         case FLEE:
-            if (game.ghostmode_timer < 0) {
-                printf("SCATTER MODE ACTIVATED\n");
+            game.flee_timer -= TIME_STEP;
+            if (game.flee_timer < 0) {
+                printf("[INFO] Flee mode completed\n");
                 set_scatter_targets();
+                /* TODO(shaw) need to actually go back to whatever state we were in before flee was triggered */
                 game.ghostmode = SCATTER;
                 game.ghostmode_timer = 7 * SEC_TO_USEC;
             }
@@ -193,25 +251,30 @@ void init_entities() {
     pacman.moving = false;
 }
 
-int main(int argc, char **argv) {
+void init_game(void) {
     init_sdl();
+    game.ghostmode = SCATTER;
+    game.level = 1;
+    set_ghostmode_timer();
+    /* the rest of the fields should have been zero initialized, game = {0}; */
+}
+
+int main(int argc, char **argv) {
+    init_game(); /* initializes global game object */
 
     init_board(board);
     init_entities();
 
     spritesheet = load_texture("../assets/spritesheet.png");
 
-    game.ghostmode = SCATTER;
-    game.ghostmode_timer = 20 * SEC_TO_USEC;
     set_scatter_targets();
 
-    quit = false;
     cur_time = 0;
     prev_time = 0;
     delta = 0;
     accumulator = 0;
 
-    while(!quit) {
+    while(!game.quit) {
         tick();
 
         accumulator += delta;

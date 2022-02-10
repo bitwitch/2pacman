@@ -1,6 +1,7 @@
 #ifndef __GLOBALS_H__
 #define __GLOBALS_H__
 
+#include <stdint.h>
 #include "structs.h"
 
 #define SCREEN_WIDTH  896
@@ -16,8 +17,7 @@
 #define SEC_TO_USEC 1e6
 
 #define TICRATE 60
-#define TIME_STEP (SEC_TO_USEC / TICRATE)  /* microseconds per frame */
-
+#define TIME_STEP ((int64_t)(SEC_TO_USEC / TICRATE))  /* microseconds per frame */
 
 
 enum {

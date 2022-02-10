@@ -17,8 +17,13 @@ typedef struct {
     SDL_Window *window;
     bool up,down,left,right;
     ghostmode_e ghostmode;
-    uint64_t ghostmode_timer;
+    int64_t ghostmode_timer;
+    int64_t flee_timer;
+    int level;
+    int phase_last_tic, phase, prev_phase;
+    bool quit;
 } game_t;
+
 
 /* used for hashmap from characters to tiles */
 typedef struct {
@@ -51,7 +56,7 @@ typedef struct {
     int target_tile;   /* the long term target tile i am heading towards */
     int scatter_target_tile;
     ghost_state_e state; 
-    uint64_t ghost_house_timer; 
+    int64_t ghost_house_timer; 
 } entity_t;
 
 #endif
