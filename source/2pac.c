@@ -39,26 +39,19 @@ void update_2pac(void) {
         pacman.moving = true;
     }
 
+    if (!pacman.moving) 
+        return;
+
     if (forward_collide(&pacman)) {
         pacman.moving = false;
         return;
     }
 
-    if (!pacman.moving) 
-        return;
-
-
-    if (pacman.dir == LEFT)
-        pacman.pos.x -= pacman.speed;
-    else if (pacman.dir == RIGHT)
-        pacman.pos.x += pacman.speed;
-    else if (pacman.dir == UP)
-        pacman.pos.y -= pacman.speed;
-    else if (pacman.dir == DOWN)
-        pacman.pos.y += pacman.speed;
-    else
-        assert(false && "unknown direction in update_2pac");
-
+    /* move towards target tile */
+    pacman.target_tile = get_adjacent_tile(pacman.tile, pacman.dir);
+    v2f_t target_tile_pos = get_tile_pos(pacman.target_tile);
+    v2f_t dir_vec = vec2f_norm(vec2f_sub(target_tile_pos, pacman.pos));
+    pacman.pos = vec2f_add(pacman.pos, vec2f_scale(dir_vec, pacman.speed));
 
     /* only enter a new tile when your center has crossed the center of the new tile */
     v2f_t cur_tile_pos = get_tile_pos(pacman.tile);

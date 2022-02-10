@@ -9,6 +9,44 @@ float vec2f_dist(v2f_t v1, v2f_t v2) {
     return sqrt(a*a + b*b);
 }
 
+float vec2f_len(v2f_t v) {
+    return sqrt(v.x*v.x + v.y*v.y);
+}
+
+v2f_t vec2f_sub(v2f_t v1, v2f_t v2) {
+    v2f_t result;
+    result.x = v1.x - v2.x;
+    result.y = v1.y - v2.y;
+    return result;
+}
+
+v2f_t vec2f_add(v2f_t v1, v2f_t v2) {
+    v2f_t result;
+    result.x = v1.x + v2.x;
+    result.y = v1.y + v2.y;
+    return result;
+}
+
+v2f_t vec2f_scale(v2f_t v, float s) {
+    v2f_t result;
+    result.x = v.x * s;
+    result.y = v.y * s;
+    return result;
+}
+
+v2f_t vec2f_norm(v2f_t v) {
+    v2f_t result;
+    float len = vec2f_len(v);
+    if (len == 0) {
+        result.x = 0;
+        result.y = 0;
+    } else {
+        result.x = v.x / len;
+        result.y = v.y / len;
+    }
+    return result;
+}
+
 
 
 /* TODO(shaw): all these tile functions should probably move to a different file */
