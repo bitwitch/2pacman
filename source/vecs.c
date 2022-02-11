@@ -60,6 +60,12 @@ v2f_t get_tile_pos(int tile) {
      return tile_pos;
 }
 
+int tile_at(v2f_t pos) {
+    int tile_x = (int)(pos.x + 0.5f) / TILE_SIZE;
+    int tile_y = (int)(pos.y + 0.5f) / TILE_SIZE;
+    return tile_y * BOARD_WIDTH + tile_x;
+}
+
 
 float dist_tiles(int tile1, int tile2) {
     v2f_t tile1_pos = get_tile_pos(tile1);
@@ -79,5 +85,5 @@ int get_adjacent_tile(int tile, int dir) {
 }
 
 bool is_solid(char c) {
-    return (c != ' ' && c != '.' && c != 'O' && c !='n');
+    return (c != ' ' && c != '.' && c != '0' && c !='n');
 }
