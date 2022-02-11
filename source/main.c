@@ -147,9 +147,9 @@ void update_ghostmode() {
             game.ghostmode_timer -= TIME_STEP;
             if (game.ghostmode_timer < 0) {
                 game.prev_phase = game.phase++;
-                /* set chase targets ???? */
                 game.ghostmode = CHASE;
                 printf("[INFO] Chase mode activated\n");
+                reverse_ghosts();
                 set_ghostmode_timer();
             }
             break;
@@ -158,9 +158,10 @@ void update_ghostmode() {
             game.ghostmode_timer -= TIME_STEP;
             if (game.ghostmode_timer < 0 && game.phase < 7) {
                 game.prev_phase = game.phase++;
-                set_scatter_targets();
                 game.ghostmode = SCATTER;
+                set_scatter_targets();
                 printf("[INFO] Scatter mode activated\n");
+                reverse_ghosts();
                 set_ghostmode_timer();
             }
             break;
@@ -169,10 +170,9 @@ void update_ghostmode() {
             game.flee_timer -= TIME_STEP;
             if (game.flee_timer < 0) {
                 printf("[INFO] Flee mode completed\n");
-                set_scatter_targets();
                 /* TODO(shaw) need to actually go back to whatever state we were in before flee was triggered */
+                set_scatter_targets();
                 game.ghostmode = SCATTER;
-                game.ghostmode_timer = 7 * SEC_TO_USEC;
             }
             break;
 

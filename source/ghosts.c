@@ -4,9 +4,20 @@
 #include "vecs.h"
 
 void set_scatter_targets(void) {
-    for (int i=0; i<GHOST_COUNT ; ++i)
+    for (int i=0; i<GHOST_COUNT; ++i)
         ghosts[i].target_tile = ghosts[i].scatter_target_tile;
 }
+
+static void set_chase_targets(void) {
+    ghosts[BLINKY].target_tile = pacman.tile;
+}
+
+
+void reverse_ghosts(void) {
+    for (int i=0; i<GHOST_COUNT; ++i)
+        ghosts[i].reverse = true;
+}
+
 
 void available_directions(entity_t *e, bool options[4]) {
     int tile;
@@ -115,12 +126,25 @@ static void update_single_ghost(entity_t *e) {
             break;
 
         case NORMAL:
+            if (e->reverse) {
+                switch (e->dir) {
+                    case    UP: e->dir = DOWN;  break;
+                    case  DOWN: e->dir = UP;    break;
+                    case  LEFT: e->dir = RIGHT; break;
+                    case RIGHT: e->dir = LEFT;  break;
+                    default: break;
+                }
+                e->reverse = false;
+            }
             move_towards_target(e);
             break;
     }
 }
 
 void update_ghosts(void) {
+    if (game.ghostmode == CHASE)
+        set_chase_targets();
+
     for (int i=0; i<GHOST_COUNT; ++i)
         update_single_ghost(&ghosts[i]);
 }

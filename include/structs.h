@@ -48,6 +48,7 @@ typedef struct {
     v2f_t pos;
     dir_e dir;
     bool moving;
+    bool reverse;
     int w, h;
     int tile;
     float speed;
