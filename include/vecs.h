@@ -7,6 +7,7 @@ typedef struct {
 
 float vec2f_dist(v2f_t v1, v2f_t v2);
 float vec2f_len(v2f_t v);
+float vec2f_dot(v2f_t v1, v2f_t v2);
 v2f_t vec2f_sub(v2f_t v1, v2f_t v2);
 v2f_t vec2f_add(v2f_t v1, v2f_t v2);
 v2f_t vec2f_scale(v2f_t v, float s);

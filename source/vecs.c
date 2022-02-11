@@ -13,6 +13,10 @@ float vec2f_len(v2f_t v) {
     return sqrt(v.x*v.x + v.y*v.y);
 }
 
+float vec2f_dot(v2f_t v1, v2f_t v2) {
+    return v1.x*v2.x + v1.y*v2.y;
+}
+
 v2f_t vec2f_sub(v2f_t v1, v2f_t v2) {
     v2f_t result;
     result.x = v1.x - v2.x;

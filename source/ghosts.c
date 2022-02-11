@@ -8,6 +8,12 @@ void set_scatter_targets(void) {
         ghosts[i].target_tile = ghosts[i].scatter_target_tile;
 }
 
+
+/* TODO(shaw): investigate using padding on all sides of the board, and using a
+ * stride, this seems like it might make some things easier and cleaner. For
+ * example calculating chase targets 
+ */
+
 static void set_chase_targets(void) {
     /* BLINKY */
     if (ghosts[BLINKY].state != EXIT_HOUSE) {
@@ -16,35 +22,62 @@ static void set_chase_targets(void) {
 
     /* PINKY */
     if (ghosts[PINKY].state != EXIT_HOUSE) {
+        int pacman_row = pacman.tile / BOARD_WIDTH;
         int target_tile;
         switch (pacman.dir) {
-            case RIGHT: target_tile = pacman.tile + 4;                 break;
-            case  DOWN: target_tile = pacman.tile + 4*BOARD_WIDTH;     break;
-            case  LEFT: target_tile = pacman.tile - 4;                 break;
-            case    UP: target_tile = pacman.tile - 4*BOARD_WIDTH - 4; break;
+            case RIGHT: 
+                target_tile = pacman.tile + 4;
+                /* handle if target wraps the board */
+                if (target_tile/BOARD_WIDTH != pacman_row)
+                    target_tile = pacman_row*BOARD_WIDTH + BOARD_WIDTH-1;
+                break;
+            case DOWN: 
+                target_tile = pacman.tile + 4*BOARD_WIDTH;
+                break;
+            case LEFT: 
+                target_tile = pacman.tile - 4;
+                /* handle if target wraps the board */
+                if (target_tile/BOARD_WIDTH != pacman_row)
+                    target_tile = pacman_row*BOARD_WIDTH;
+                break;
+            case UP: 
+                target_tile = pacman.tile - 4*BOARD_WIDTH - 4; 
+                /* TODO(shaw): handle if target wraps the board on the left
+                 * because of the left offset */
+                break;
             default: 
                 assert(false && "unknown dir in set_chase_targets");
                 break;
         }
         ghosts[PINKY].target_tile = target_tile;
-        /* TODO(shaw): need to handle if the target tile wraps the board */
     }
 
     /* INKY */
     if (ghosts[INKY].state != EXIT_HOUSE) {
-        int ahead_tile;
+        v2f_t ahead_vec = {0};
         switch (pacman.dir) {
-            case RIGHT: ahead_tile = pacman.tile + 2;                 break;
-            case  DOWN: ahead_tile = pacman.tile + 2*BOARD_WIDTH;     break;
-            case  LEFT: ahead_tile = pacman.tile - 2;                 break;
-            case    UP: ahead_tile = pacman.tile - 2*BOARD_WIDTH - 2; break;
+            case RIGHT: ahead_vec.x =  2*TILE_SIZE; break;
+            case  LEFT: ahead_vec.x = -2*TILE_SIZE; break;
+            case  DOWN: ahead_vec.y =  2*TILE_SIZE; break;
+            case    UP: ahead_vec.y = -2*TILE_SIZE; break;
             default: 
                 assert(false && "unknown dir in set_chase_targets");
                 break;
         }
+
+        v2f_t ahead_tile_pos = vec2f_add(get_tile_pos(pacman.tile), ahead_vec);
         v2f_t blinky_pos = get_tile_pos(ghosts[BLINKY].tile);
-        v2f_t blinky_to_ahead = vec2f_sub(get_tile_pos(ahead_tile), blinky_pos);
+
+        v2f_t blinky_to_ahead = vec2f_sub(ahead_tile_pos, blinky_pos);
         v2f_t target_pos = vec2f_add(blinky_pos, vec2f_scale(blinky_to_ahead, 2));
+
+        if (target_pos.x > BOARD_WIDTH*TILE_SIZE) {
+            v2f_t right = {1, 0};
+            float cos_angle = vec2f_dot(right, vec2f_norm(blinky_to_ahead));
+            float scale = (BOARD_WIDTH*TILE_SIZE - 0.5*TILE_SIZE - blinky_pos.x) / cos_angle;
+            blinky_to_ahead = vec2f_scale(vec2f_norm(blinky_to_ahead), scale);
+            target_pos = vec2f_add(blinky_pos, blinky_to_ahead);
+        }
 
         ghosts[INKY].target_tile = tile_at(target_pos);
         /* TODO(shaw): need to handle if the target tile wraps the board */
