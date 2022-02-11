@@ -35,6 +35,11 @@ void init_sdl(void) {
 
 }
 
+/* TODO(shaw): investigate using padding on all sides of the board, and using a
+ * stride, this seems like it might make some things easier and cleaner. For
+ * example calculating chase targets 
+ */
+
 void init_board(char *board) {
     assert(BOARD_WIDTH == 28 && BOARD_HEIGHT == 31 && "init_board must be updated if width or height changes");
     memset(board, 0, BOARD_WIDTH*BOARD_HEIGHT);
