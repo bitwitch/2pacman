@@ -13,6 +13,7 @@ v2f_t vec2f_scale(v2f_t v, float s);
 v2f_t vec2f_norm(v2f_t v);
 
 v2f_t get_tile_pos(int tile);
+int tile_at(v2f_t pos);
 float dist_tiles(int tile1, int tile2);
 int get_adjacent_tile(int tile, int dir);
 bool is_solid(char c);

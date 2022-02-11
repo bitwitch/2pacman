@@ -32,6 +32,22 @@ void render(char *board, int board_size, float interp) {
         y = (int)(ghost.pos.y + 0.5) - TILE_SIZE;
         SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+
+        /* TEMPORARILY DRAW THE TARGET TILES */
+        switch (i) {
+        case BLINKY: SDL_SetRenderDrawColor(game.renderer, 255, 0, 0, 255); break;
+        case PINKY: SDL_SetRenderDrawColor(game.renderer, 229, 126, 252, 255); break;
+        case INKY: SDL_SetRenderDrawColor(game.renderer, 200, 242, 252, 255); break;
+        case CLYDE: SDL_SetRenderDrawColor(game.renderer, 252, 165, 65, 255); break;
+        }
+        v2f_t tile_pos = get_tile_pos(ghost.target_tile);
+        SDL_Rect tile_rect = {
+            .x = (tile_pos.x-0.5*TILE_SIZE)*SCALE+15, 
+            .y = (tile_pos.y-0.5*TILE_SIZE)*SCALE+15, 
+            .w = TILE_RENDER_SIZE, 
+            .h = TILE_RENDER_SIZE
+        };
+        SDL_RenderDrawRect(game.renderer, &tile_rect);
     }
 
     SDL_Rect srcrect = hmget(tilemap, pacman.c);
@@ -39,7 +55,6 @@ void render(char *board, int board_size, float interp) {
     y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
     SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
     SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
-
 
     SDL_RenderPresent(game.renderer);
 }

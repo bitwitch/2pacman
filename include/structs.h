@@ -49,7 +49,6 @@ typedef struct {
     dir_e dir;
     bool moving;
     bool reverse;
-    int w, h;
     int tile;
     float speed;
     char c;            /* character that maps to my spritesheet location */

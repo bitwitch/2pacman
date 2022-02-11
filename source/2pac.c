@@ -3,12 +3,19 @@
 #include "globals.h"
 #include "vecs.h"
 
-bool forward_collide(entity_t *e) {
+static bool forward_collide(entity_t *e) {
+    /* ignore collisions in portal, movement is restricted to left right anyway */
+    if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE)
+        return false;
+
     /*check tile one ahead in travel direction*/
     int front_tile = get_adjacent_tile(e->tile, e->dir);
+
+    /* ghost house door */
+    if (board[front_tile] == 'n') return true;
  
-    if (board[front_tile] == ' ' || board[front_tile] == '.' || board[front_tile] == '0') {
-            return false;
+    if (!is_solid(board[front_tile])) {
+        return false;
     } else {
         v2f_t front_tile_pos = get_tile_pos(front_tile);
         if (vec2f_dist(front_tile_pos, e->pos) > TILE_SIZE)
@@ -18,12 +25,29 @@ bool forward_collide(entity_t *e) {
     return true;
 }
 
+static void available_directions(bool options[4]) {
+    int tile;
+    for (int dir=0; dir<4; ++dir) {
+        tile = get_adjacent_tile(pacman.tile, dir);
+        options[dir] = !is_solid(board[tile]);
+        if (board[tile] == 'n')
+            options[dir] = false;
+    }
+
+    /* only allow left and right movement through the portal */
+    if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
+        if (pacman.dir == LEFT)  options[LEFT] = true;
+        else if (pacman.dir == RIGHT) options[RIGHT] = true;
+        options[UP] = false;
+        options[DOWN] = false;
+    }
+
+}
+
+
 void update_2pac(void) {
     bool options[4];
-    for (int dir=0; dir<4; ++dir) {
-        int tile = get_adjacent_tile(pacman.tile, dir);
-        options[dir] = !is_solid(board[tile]);
-    }
+    available_directions(options);
 
     if (game.left && options[LEFT]) {
         pacman.dir = LEFT;
@@ -44,6 +68,26 @@ void update_2pac(void) {
 
     if (forward_collide(&pacman)) {
         pacman.moving = false;
+        return;
+    }
+
+    /* handle movement through the portal */
+    if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
+        if (pacman.dir == LEFT) { 
+            pacman.pos.x -= pacman.speed;
+            pacman.moving = true;
+        }
+        else if (pacman.dir == RIGHT) {
+            pacman.pos.x += pacman.speed;
+            pacman.moving = true;
+        }
+
+        if (pacman.pos.x < -TILE_SIZE && pacman.dir == LEFT)
+            pacman.pos.x = BOARD_WIDTH*TILE_SIZE + TILE_SIZE;
+
+        if (pacman.pos.x > BOARD_WIDTH*TILE_SIZE + TILE_SIZE && pacman.dir == RIGHT)
+            pacman.pos.x = -TILE_SIZE;
+
         return;
     }
 

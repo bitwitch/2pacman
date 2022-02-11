@@ -9,7 +9,55 @@ void set_scatter_targets(void) {
 }
 
 static void set_chase_targets(void) {
-    ghosts[BLINKY].target_tile = pacman.tile;
+    /* BLINKY */
+    if (ghosts[BLINKY].state != EXIT_HOUSE) {
+        ghosts[BLINKY].target_tile = pacman.tile;
+    }
+
+    /* PINKY */
+    if (ghosts[PINKY].state != EXIT_HOUSE) {
+        int target_tile;
+        switch (pacman.dir) {
+            case RIGHT: target_tile = pacman.tile + 4;                 break;
+            case  DOWN: target_tile = pacman.tile + 4*BOARD_WIDTH;     break;
+            case  LEFT: target_tile = pacman.tile - 4;                 break;
+            case    UP: target_tile = pacman.tile - 4*BOARD_WIDTH - 4; break;
+            default: 
+                assert(false && "unknown dir in set_chase_targets");
+                break;
+        }
+        ghosts[PINKY].target_tile = target_tile;
+        /* TODO(shaw): need to handle if the target tile wraps the board */
+    }
+
+    /* INKY */
+    if (ghosts[INKY].state != EXIT_HOUSE) {
+        int ahead_tile;
+        switch (pacman.dir) {
+            case RIGHT: ahead_tile = pacman.tile + 2;                 break;
+            case  DOWN: ahead_tile = pacman.tile + 2*BOARD_WIDTH;     break;
+            case  LEFT: ahead_tile = pacman.tile - 2;                 break;
+            case    UP: ahead_tile = pacman.tile - 2*BOARD_WIDTH - 2; break;
+            default: 
+                assert(false && "unknown dir in set_chase_targets");
+                break;
+        }
+        v2f_t blinky_pos = get_tile_pos(ghosts[BLINKY].tile);
+        v2f_t blinky_to_ahead = vec2f_sub(get_tile_pos(ahead_tile), blinky_pos);
+        v2f_t target_pos = vec2f_add(blinky_pos, vec2f_scale(blinky_to_ahead, 2));
+
+        ghosts[INKY].target_tile = tile_at(target_pos);
+        /* TODO(shaw): need to handle if the target tile wraps the board */
+    }
+
+    /* CLYDE */
+    if (ghosts[CLYDE].state != EXIT_HOUSE) {
+        if (vec2f_dist(ghosts[CLYDE].pos, pacman.pos) > 8*TILE_SIZE)
+            ghosts[CLYDE].target_tile = pacman.tile;
+        else
+            ghosts[CLYDE].target_tile = ghosts[CLYDE].scatter_target_tile;
+    }
+
 }
 
 
@@ -19,11 +67,21 @@ void reverse_ghosts(void) {
 }
 
 
-void available_directions(entity_t *e, bool options[4]) {
+static void available_directions(entity_t *e, bool options[4]) {
     int tile;
     for (int dir=0; dir<4; ++dir) {
         tile = get_adjacent_tile(e->tile, dir);
         options[dir] = !is_solid(board[tile]);
+        if (board[tile] == 'n' && dir == DOWN)
+            options[DOWN] = false;
+    }
+
+    /* only allow left and right movement through the portal */
+    if (e->pos.x < TILE_SIZE || e->pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
+        if (e->dir == LEFT)  options[LEFT] = true;
+        else if (e->dir == RIGHT) options[RIGHT] = true;
+        options[UP] = false;
+        options[DOWN] = false;
     }
 
     if (e->dir == LEFT)       options[RIGHT] = false;
@@ -32,27 +90,51 @@ void available_directions(entity_t *e, bool options[4]) {
     else if (e->dir == DOWN)  options[UP] = false;
     else
         assert(false && "unknown direction in available_directions");
+
 }
 
 void move_towards_target(entity_t *e) {
-    if (e->dir == LEFT)
+    bool options[4]; 
+    available_directions(e, options);
+
+    if (e->dir == LEFT && options[LEFT])
         e->pos.x -= e->speed;
-    else if (e->dir == RIGHT)
+    else if (e->dir == RIGHT && options[RIGHT])
         e->pos.x += e->speed;
-    else if (e->dir == UP)
+    else if (e->dir == UP && options[UP])
         e->pos.y -= e->speed;
-    else if (e->dir == DOWN)
+    else if (e->dir == DOWN && options[DOWN])
         e->pos.y += e->speed;
-    else
-        assert(false && "unknown direction in move_towards_target");
+
+    if (e->pos.x < 0) {
+        if (e->pos.x < -TILE_SIZE && e->dir == LEFT)
+            e->pos.x = BOARD_WIDTH*TILE_SIZE + TILE_SIZE;
+        return;
+    }
+
+    if (e->pos.x > BOARD_WIDTH*TILE_SIZE) {
+        if (e->pos.x > BOARD_WIDTH*TILE_SIZE + TILE_SIZE && e->dir == RIGHT)
+            e->pos.x = -TILE_SIZE;
+        return;
+    }
+
+
 
     /* only enter a new tile when your center has crossed the center of the new tile */
     v2f_t cur_tile_pos = get_tile_pos(e->tile);
     if (vec2f_dist(cur_tile_pos, e->pos) >= TILE_SIZE) {
-        int tile_x = (int)(e->pos.x + 0.5f) / TILE_SIZE;
-        int tile_y = (int)(e->pos.y + 0.5f) / TILE_SIZE;
-        int next_tile = tile_y * BOARD_WIDTH + tile_x;
-        e->tile = next_tile;
+        e->tile = tile_at(e->pos);
+
+        if (e->reverse && e->state == NORMAL) {
+            switch (e->dir) {
+                case    UP: e->dir = DOWN;  break;
+                case  DOWN: e->dir = UP;    break;
+                case  LEFT: e->dir = RIGHT; break;
+                case RIGHT: e->dir = LEFT;  break;
+                default: break;
+            }
+            e->reverse = false;
+        }
 
         /* just entered a new tile, make a decision on next direction to pick */
 
@@ -85,10 +167,7 @@ static void ghost_hover(entity_t *e) {
     /* only enter a new tile when your center has crossed the center of the new tile */
     v2f_t cur_tile_pos = get_tile_pos(e->tile);
     if (vec2f_dist(cur_tile_pos, e->pos) >= TILE_SIZE) {
-        int tile_x = (int)(e->pos.x) / TILE_SIZE;
-        int tile_y = (int)(e->pos.y) / TILE_SIZE;
-        int next_tile = tile_y * BOARD_WIDTH + tile_x;
-        e->tile = next_tile;
+        e->tile = tile_at(e->pos);
 
         int tile = get_adjacent_tile(e->tile, e->dir);
         if (board[tile] != ' ')
@@ -119,23 +198,14 @@ static void update_single_ghost(entity_t *e) {
                 e->state = NORMAL;
                 if (game.ghostmode == SCATTER)
                     e->target_tile = e->scatter_target_tile;
-                else
-                    e->target_tile = e->scatter_target_tile;
+                else if (game.ghostmode == CHASE)
+                    /* NOTE(shaw): only really need to set one target here, but probably doesn't matter */
+                    set_chase_targets();
 
             }
             break;
 
         case NORMAL:
-            if (e->reverse) {
-                switch (e->dir) {
-                    case    UP: e->dir = DOWN;  break;
-                    case  DOWN: e->dir = UP;    break;
-                    case  LEFT: e->dir = RIGHT; break;
-                    case RIGHT: e->dir = LEFT;  break;
-                    default: break;
-                }
-                e->reverse = false;
-            }
             move_towards_target(e);
             break;
     }

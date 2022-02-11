@@ -198,7 +198,7 @@ void init_entities() {
     ghosts[BLINKY].c = 'B';
     ghosts[BLINKY].pos.x = x; 
     ghosts[BLINKY].pos.y = y;
-    ghosts[BLINKY].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
+    ghosts[BLINKY].tile = tile_at(ghosts[BLINKY].pos);
     ghosts[BLINKY].speed = speed;
     ghosts[BLINKY].dir = LEFT;
     ghosts[BLINKY].moving = true;
@@ -209,7 +209,7 @@ void init_entities() {
     ghosts[INKY].c = 'I';
     ghosts[INKY].pos.x = x; 
     ghosts[INKY].pos.y = y;
-    ghosts[INKY].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
+    ghosts[INKY].tile = tile_at(ghosts[INKY].pos);
     ghosts[INKY].speed = speed;
     ghosts[INKY].dir = UP;
     ghosts[INKY].ghost_house_timer = 4 * SEC_TO_USEC;
@@ -221,7 +221,7 @@ void init_entities() {
     ghosts[PINKY].c = 'P';
     ghosts[PINKY].pos.x = x; 
     ghosts[PINKY].pos.y = y;
-    ghosts[PINKY].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
+    ghosts[PINKY].tile = tile_at(ghosts[PINKY].pos);
     ghosts[PINKY].speed = speed;
     ghosts[PINKY].dir = UP;
     ghosts[PINKY].ghost_house_timer = 1 * SEC_TO_USEC;
@@ -233,7 +233,7 @@ void init_entities() {
     ghosts[CLYDE].c = 'C';
     ghosts[CLYDE].pos.x = x; 
     ghosts[CLYDE].pos.y = y;
-    ghosts[CLYDE].tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
+    ghosts[CLYDE].tile = tile_at(ghosts[CLYDE].pos);
     ghosts[CLYDE].speed = speed;
     ghosts[CLYDE].dir = UP;
     ghosts[CLYDE].ghost_house_timer = 7 * SEC_TO_USEC;
@@ -245,7 +245,7 @@ void init_entities() {
     pacman.c = '>';
     pacman.pos.x = x;
     pacman.pos.y = y;
-    pacman.tile = (int)y/8 * BOARD_WIDTH + (int)x/8;
+    pacman.tile = tile_at(pacman.pos);
     pacman.speed = speed;
     pacman.dir = LEFT;
     pacman.moving = false;
