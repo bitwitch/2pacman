@@ -221,7 +221,7 @@ void init_entities() {
     float x,y;
     float speed = 0.814159;
 
-    x = 111.0f; y = 92.0f;
+    x = 111.0f; y = 116.0f;
     ghosts[BLINKY].c = 'B';
     ghosts[BLINKY].pos.x = x; 
     ghosts[BLINKY].pos.y = y;
@@ -232,7 +232,7 @@ void init_entities() {
     ghosts[BLINKY].state = NORMAL;
     ghosts[BLINKY].scatter_target_tile = 27;
 
-    x = 95.0f; y = 116.0f;
+    x = 95.0f; y = 140.0f;
     ghosts[INKY].c = 'I';
     ghosts[INKY].pos.x = x; 
     ghosts[INKY].pos.y = y;
@@ -244,7 +244,7 @@ void init_entities() {
     ghosts[INKY].state = HOUSE_PARTY;
     ghosts[INKY].scatter_target_tile = 36*BOARD_WIDTH;
 
-    x = 111.0f; y = 116.0f;
+    x = 111.0f; y = 140.0f;
     ghosts[PINKY].c = 'P';
     ghosts[PINKY].pos.x = x; 
     ghosts[PINKY].pos.y = y;
@@ -256,7 +256,7 @@ void init_entities() {
     ghosts[PINKY].state = HOUSE_PARTY;
     ghosts[PINKY].scatter_target_tile = 0;
 
-    x = 127.0f; y = 116.0f;
+    x = 127.0f; y = 140.0f;
     ghosts[CLYDE].c = 'C';
     ghosts[CLYDE].pos.x = x; 
     ghosts[CLYDE].pos.y = y;
@@ -268,7 +268,7 @@ void init_entities() {
     ghosts[CLYDE].state = HOUSE_PARTY;
     ghosts[CLYDE].scatter_target_tile = 36*BOARD_WIDTH + 27;
 
-    x = 111.0f; y = 188.0f;
+    x = 111.0f; y = 212.0f;
     pacman.c = '>';
     pacman.pos.x = x;
     pacman.pos.y = y;

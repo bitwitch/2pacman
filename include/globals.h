@@ -8,7 +8,7 @@
 #define SCREEN_HEIGHT 1152
 
 #define BOARD_WIDTH  28
-#define BOARD_HEIGHT 31
+#define BOARD_HEIGHT 36
 
 #define DOT_COUNT 244
 

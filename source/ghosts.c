@@ -109,7 +109,7 @@ static void available_directions(entity_t *e, bool options[4]) {
             options[DOWN] = false;
     }
 
-    /* only allow left and right movement through the portal */
+    /* only allow left and right movement through the tunnel */
     if (e->pos.x < TILE_SIZE || e->pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
         if (e->dir == LEFT)  options[LEFT] = true;
         else if (e->dir == RIGHT) options[RIGHT] = true;
@@ -208,7 +208,7 @@ static void ghost_hover(entity_t *e) {
     }
 }
 
-#define GHOST_HOUSE_EXIT_TILE ((88/TILE_SIZE) * BOARD_WIDTH + (104/TILE_SIZE))
+#define GHOST_HOUSE_EXIT_TILE ((112/TILE_SIZE) * BOARD_WIDTH + (104/TILE_SIZE))
 
 static void update_single_ghost(entity_t *e) {
     switch (e->state) {

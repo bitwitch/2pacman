@@ -4,7 +4,7 @@
 #include "vecs.h"
 
 static bool forward_collide(entity_t *e) {
-    /* ignore collisions in portal, movement is restricted to left right anyway */
+    /* ignore collisions in tunnel, movement is restricted to left right anyway */
     if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE)
         return false;
 
@@ -34,7 +34,7 @@ static void available_directions(bool options[4]) {
             options[dir] = false;
     }
 
-    /* only allow left and right movement through the portal */
+    /* only allow left and right movement through the tunnel */
     if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
         if (pacman.dir == LEFT)  options[LEFT] = true;
         else if (pacman.dir == RIGHT) options[RIGHT] = true;
@@ -71,7 +71,7 @@ void update_2pac(void) {
         return;
     }
 
-    /* handle movement through the portal */
+    /* handle movement through the tunnel */
     if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
         if (pacman.dir == LEFT) { 
             pacman.pos.x -= pacman.speed;

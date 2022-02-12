@@ -41,9 +41,12 @@ void init_sdl(void) {
  */
 
 void init_board(char *board) {
-    assert(BOARD_WIDTH == 28 && BOARD_HEIGHT == 31 && "init_board must be updated if width or height changes");
+    assert(BOARD_WIDTH == 28 && BOARD_HEIGHT == 36 && "init_board must be updated if width or height changes");
     memset(board, 0, BOARD_WIDTH*BOARD_HEIGHT);
     int offset = 0;
+    memcpy(board+offset, "                            ", BOARD_WIDTH); offset += BOARD_WIDTH;
+    memcpy(board+offset, "                            ", BOARD_WIDTH); offset += BOARD_WIDTH;
+    memcpy(board+offset, "                            ", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "1^^^^^^^^^^^^qw^^^^^^^^^^^^2", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "{............[]............}", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "{.u~~o.u~~~o.[].u~~~o.u~~o.}", BOARD_WIDTH); offset += BOARD_WIDTH;
@@ -75,6 +78,8 @@ void init_board(char *board) {
     memcpy(board+offset, "{.i--------p.ip.i--------p.}", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "{..........................}", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "4__________________________3", BOARD_WIDTH); offset += BOARD_WIDTH;
+    memcpy(board+offset, "                            ", BOARD_WIDTH); offset += BOARD_WIDTH;
+    memcpy(board+offset, "                            ", BOARD_WIDTH); offset += BOARD_WIDTH;
 
     SDL_Rect none       = {0, 88, 8, 8};    hmput(tilemap, ' ', none);
 
