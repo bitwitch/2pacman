@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
     init_board(board);
     init_entities();
 
-    spritesheet = load_texture("../assets/spritesheet.png");
+    spritesheet = load_texture("assets/spritesheet.png");
 
     set_scatter_targets();
 
