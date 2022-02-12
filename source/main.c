@@ -182,11 +182,32 @@ void update_ghostmode() {
     }
 }
 
+void update_board(void) {
+    if (board[pacman.tile] == '.') {
+        board[pacman.tile] = ' ';
+
+        /* TODO(shaw): update score */
+
+        /* TODO(shaw): if all dots have been eaten, level completed. This could
+         * easily be done by just using a counter */
+    }
+
+    static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
+    if (board[pacman.tile] == '0') {
+        board[pacman.tile] = ' ';
+        /* TODO(shaw): update score */
+        game.flee_timer = game.level > 18 ? 0 : flee_times[game.level-1]*SEC_TO_USEC;
+        game.ghostmode = FLEE;
+        reverse_ghosts();
+    }
+}
+
 void update(void) {
     do_input();
     update_ghostmode();
     update_ghosts();
     update_2pac();
+    update_board();
 }
 
 
