@@ -141,12 +141,10 @@ void set_ghostmode_timer() {
    Phase8. chase forever
 */
 void update_ghostmode() {
-    game.phase_last_tic = game.phase;
     switch (game.ghostmode) {
         case SCATTER: 
             game.ghostmode_timer -= TIME_STEP;
             if (game.ghostmode_timer < 0) {
-                game.prev_phase = game.phase++;
                 game.ghostmode = CHASE;
                 printf("[INFO] Chase mode activated\n");
                 reverse_ghosts();
@@ -157,7 +155,6 @@ void update_ghostmode() {
         case CHASE:   
             game.ghostmode_timer -= TIME_STEP;
             if (game.ghostmode_timer < 0 && game.phase < 7) {
-                game.prev_phase = game.phase++;
                 game.ghostmode = SCATTER;
                 set_scatter_targets();
                 printf("[INFO] Scatter mode activated\n");
@@ -169,10 +166,14 @@ void update_ghostmode() {
         case FLEE:
             game.flee_timer -= TIME_STEP;
             if (game.flee_timer < 0) {
-                printf("[INFO] Flee mode completed\n");
-                /* TODO(shaw) need to actually go back to whatever state we were in before flee was triggered */
-                set_scatter_targets();
-                game.ghostmode = SCATTER;
+                if (game.prev_ghostmode == SCATTER) {
+                    set_scatter_targets();
+                    game.ghostmode = SCATTER;
+                    printf("[INFO] Scatter mode activated\n");
+                } else {
+                    game.ghostmode = CHASE;
+                    printf("[INFO] Chase mode activated\n");
+                }
             }
             break;
 
@@ -185,20 +186,25 @@ void update_ghostmode() {
 void update_board(void) {
     if (board[pacman.tile] == '.') {
         board[pacman.tile] = ' ';
-
-        /* TODO(shaw): update score */
-
-        /* TODO(shaw): if all dots have been eaten, level completed. This could
-         * easily be done by just using a counter */
+        --game.dots_remaining;
+        game.score += 10;
     }
 
     static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
     if (board[pacman.tile] == '0') {
         board[pacman.tile] = ' ';
-        /* TODO(shaw): update score */
+        --game.dots_remaining;
+        game.score += 50;
         game.flee_timer = game.level > 18 ? 0 : flee_times[game.level-1]*SEC_TO_USEC;
-        game.ghostmode = FLEE;
         reverse_ghosts();
+        game.prev_ghostmode = game.ghostmode;
+        game.ghostmode = FLEE;
+        printf("[INFO] Flee mode activated\n");
+    }
+
+    if (game.dots_remaining == 0) {
+        /* TODO(shaw): level completed */
+        printf("Level %d completed!\n", game.level);
     }
 }
 
@@ -277,6 +283,7 @@ void init_game(void) {
     game.ghostmode = SCATTER;
     game.level = 1;
     set_ghostmode_timer();
+    game.dots_remaining = DOT_COUNT;
     /* the rest of the fields should have been zero initialized, game = {0}; */
 }
 

@@ -16,12 +16,14 @@ typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
     bool up,down,left,right;
-    ghostmode_e ghostmode;
+    ghostmode_e ghostmode, prev_ghostmode;
     int64_t ghostmode_timer;
     int64_t flee_timer;
     int level;
-    int phase_last_tic, phase, prev_phase;
+    int phase;
     bool quit;
+    int dots_remaining;
+    int score;
 } game_t;
 
 

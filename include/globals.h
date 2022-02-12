@@ -10,6 +10,8 @@
 #define BOARD_WIDTH  28
 #define BOARD_HEIGHT 31
 
+#define DOT_COUNT 244
+
 #define SCALE 3
 #define TILE_SIZE 8
 #define TILE_RENDER_SIZE (TILE_SIZE * SCALE)
