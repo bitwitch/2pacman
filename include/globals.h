@@ -31,8 +31,8 @@ enum {
 };
 
 extern game_t game;
-extern entity_t ghosts[GHOST_COUNT];
-extern entity_t pacman;
+extern ghost_t ghosts[GHOST_COUNT];
+extern pacman_t pacman;
 extern tilemap_t *tilemap;
 extern char board[BOARD_WIDTH*BOARD_HEIGHT];
 

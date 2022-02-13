@@ -112,7 +112,7 @@ static bool up_forbidden(int tile) {
     return tile == 376 || tile == 379 || tile == 712 || tile == 715;
 }
 
-static void available_directions(entity_t *e, bool options[4]) {
+static void available_directions(ghost_t *e, bool options[4]) {
     int tile;
     for (int dir=0; dir<4; ++dir) {
         tile = get_adjacent_tile(e->tile, dir);
@@ -141,7 +141,7 @@ static void available_directions(entity_t *e, bool options[4]) {
 
 }
 
-void move_towards_target(entity_t *e) {
+void move_towards_target(ghost_t *e) {
     bool options[4]; 
     available_directions(e, options);
 
@@ -208,7 +208,7 @@ void move_towards_target(entity_t *e) {
     }
 }
 
-static void ghost_hover(entity_t *e) {
+static void ghost_hover(ghost_t *e) {
     if (e->dir == UP)
         e->pos.y -= e->speed;
     else if (e->dir == DOWN)
@@ -226,7 +226,7 @@ static void ghost_hover(entity_t *e) {
 }
 
 
-static void update_single_ghost(entity_t *e) {
+static void update_single_ghost(ghost_t *e) {
     switch (e->state) {
         case HOUSE_PARTY:
             ghost_hover(e);

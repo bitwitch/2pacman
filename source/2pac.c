@@ -3,9 +3,9 @@
 #include "globals.h"
 #include "vecs.h"
 
-static bool forward_collide(entity_t *e) {
+static bool forward_collide(pacman_t *e) {
     /* ignore collisions in tunnel, movement is restricted to left right anyway */
-    if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE)
+    if (e->pos.x < TILE_SIZE || e->pos.x > (BOARD_WIDTH-1)*TILE_SIZE)
         return false;
 
     /*check tile one ahead in travel direction*/

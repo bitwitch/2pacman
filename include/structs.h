@@ -54,11 +54,22 @@ typedef struct {
     int tile;
     float speed;
     char c;            /* character that maps to my spritesheet location */
-    int next_tile;     /* the next tile i am heading towards */
     int target_tile;   /* the long term target tile i am heading towards */
     int scatter_target_tile;
     ghost_state_e state; 
     int64_t ghost_house_timer; 
-} entity_t;
+} ghost_t;
+
+typedef struct {
+    v2f_t pos;
+    dir_e dir;
+    bool moving;
+    int tile;
+    float speed;
+    char c;            /* character that maps to my spritesheet location */
+    int target_tile;   /* the long term target tile i am heading towards */
+} pacman_t;
+
+
 
 #endif

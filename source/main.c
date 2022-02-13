@@ -23,8 +23,8 @@ game_t game = {0};
 char board[BOARD_WIDTH*BOARD_HEIGHT] = {0};
 tilemap_t *tilemap = NULL;
 SDL_Texture *spritesheet;
-entity_t ghosts[GHOST_COUNT] = {0};
-entity_t pacman;
+ghost_t ghosts[GHOST_COUNT] = {0};
+pacman_t pacman;
 
 /*
  * idea taken from doom source

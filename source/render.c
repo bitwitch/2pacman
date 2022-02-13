@@ -6,6 +6,10 @@
 
 extern SDL_Texture *spritesheet;
 
+/*SDL_Rect ghost_animation_frame(ghost_t *ghost) {*/
+    /*SDL_Rect srcrect = hmget(tilemap, ghost->c);*/
+/*}*/
+
 void render(char *board, int board_size, float interp) {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     SDL_RenderClear(game.renderer);
@@ -26,10 +30,13 @@ void render(char *board, int board_size, float interp) {
 
     /* render entities */
     for (int i=0; i<GHOST_COUNT; ++i) {
-        entity_t ghost = ghosts[i];
-        SDL_Rect srcrect = hmget(tilemap, ghost.c);
-        x = (int)(ghost.pos.x + 0.5) - TILE_SIZE;
-        y = (int)(ghost.pos.y + 0.5) - TILE_SIZE;
+        ghost_t *ghost = &ghosts[i];
+
+        /*SDL_Rect srcrect = get_animation_frame(ghost);*/
+        SDL_Rect srcrect = hmget(tilemap, ghost->c);
+
+        x = (int)(ghost->pos.x + 0.5) - TILE_SIZE;
+        y = (int)(ghost->pos.y + 0.5) - TILE_SIZE;
         SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
 
@@ -40,7 +47,7 @@ void render(char *board, int board_size, float interp) {
         case INKY: SDL_SetRenderDrawColor(game.renderer, 200, 242, 252, 255); break;
         case CLYDE: SDL_SetRenderDrawColor(game.renderer, 252, 165, 65, 255); break;
         }
-        v2f_t tile_pos = get_tile_pos(ghost.target_tile);
+        v2f_t tile_pos = get_tile_pos(ghost->target_tile);
         SDL_Rect tile_rect = {
             .x = (tile_pos.x-0.5*TILE_SIZE)*SCALE+15, 
             .y = (tile_pos.y-0.5*TILE_SIZE)*SCALE+15, 
