@@ -230,7 +230,7 @@ void init_entities() {
     ghosts[BLINKY].dir = LEFT;
     ghosts[BLINKY].moving = true;
     ghosts[BLINKY].state = NORMAL;
-    ghosts[BLINKY].scatter_target_tile = 27;
+    ghosts[BLINKY].scatter_target_tile = 25;
 
     x = 95.0f; y = 140.0f;
     ghosts[INKY].c = 'I';
@@ -254,7 +254,7 @@ void init_entities() {
     ghosts[PINKY].ghost_house_timer = 1 * SEC_TO_USEC;
     ghosts[PINKY].moving = true;
     ghosts[PINKY].state = HOUSE_PARTY;
-    ghosts[PINKY].scatter_target_tile = 0;
+    ghosts[PINKY].scatter_target_tile = 2;
 
     x = 127.0f; y = 140.0f;
     ghosts[CLYDE].c = 'C';

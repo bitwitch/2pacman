@@ -3,11 +3,13 @@
 #include "globals.h"
 #include "vecs.h"
 
+#define GHOST_HOUSE_EXIT_TILE ((112/TILE_SIZE) * BOARD_WIDTH + (104/TILE_SIZE))
+
+
 void set_scatter_targets(void) {
     for (int i=0; i<GHOST_COUNT; ++i)
         ghosts[i].target_tile = ghosts[i].scatter_target_tile;
 }
-
 
 /* TODO(shaw): investigate using padding on all sides of the board, and using a
  * stride, this seems like it might make some things easier and cleaner. For
@@ -99,6 +101,16 @@ void reverse_ghosts(void) {
         ghosts[i].reverse = true;
 }
 
+/* forbid moving up through the four specific tiles near the center of the
+ * board, these are just hardcoded:
+ *   row 13, col 12 -> 376
+ *   row 13, col 15 -> 379
+ *   row 25, col 12 -> 712
+ *   row 15, col 15 -> 715
+ */
+static bool up_forbidden(int tile) {
+    return tile == 376 || tile == 379 || tile == 712 || tile == 715;
+}
 
 static void available_directions(entity_t *e, bool options[4]) {
     int tile;
@@ -107,6 +119,8 @@ static void available_directions(entity_t *e, bool options[4]) {
         options[dir] = !is_solid(board[tile]);
         if (board[tile] == 'n' && dir == DOWN)
             options[DOWN] = false;
+        if (dir == UP && up_forbidden(tile))
+            options[UP] = false;
     }
 
     /* only allow left and right movement through the tunnel */
@@ -117,6 +131,7 @@ static void available_directions(entity_t *e, bool options[4]) {
         options[DOWN] = false;
     }
 
+    /* don't allow reversing direction */
     if (e->dir == LEFT)       options[RIGHT] = false;
     else if (e->dir == RIGHT) options[LEFT] = false;
     else if (e->dir == UP)    options[DOWN] = false;
@@ -129,6 +144,8 @@ static void available_directions(entity_t *e, bool options[4]) {
 void move_towards_target(entity_t *e) {
     bool options[4]; 
     available_directions(e, options);
+
+    /* TODO(shaw): decrease ghost speed if travelling through tunnel */
 
     if (e->dir == LEFT && options[LEFT])
         e->pos.x -= e->speed;
@@ -208,7 +225,6 @@ static void ghost_hover(entity_t *e) {
     }
 }
 
-#define GHOST_HOUSE_EXIT_TILE ((112/TILE_SIZE) * BOARD_WIDTH + (104/TILE_SIZE))
 
 static void update_single_ghost(entity_t *e) {
     switch (e->state) {
