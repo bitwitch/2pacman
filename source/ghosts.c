@@ -102,6 +102,11 @@ void reverse_ghosts(void) {
         ghosts[i].reverse = true;
 }
 
+void frighten_ghosts(bool value) {
+    for (int i=0; i<GHOST_COUNT; ++i)
+        ghosts[i].frightened = value;
+}
+
 /* forbid moving up through the four specific tiles near the center of the
  * board, these are just hardcoded:
  *   row 13, col 12 -> 376
@@ -157,18 +162,17 @@ void move_towards_target(ghost_t *e) {
     else if (e->dir == DOWN && options[DOWN])
         e->pos.y += e->speed;
 
+    /* movement through tunnel */
     if (e->pos.x < 0) {
         if (e->pos.x < -TILE_SIZE && e->dir == LEFT)
             e->pos.x = BOARD_WIDTH*TILE_SIZE + TILE_SIZE;
         return;
     }
-
     if (e->pos.x > BOARD_WIDTH*TILE_SIZE) {
         if (e->pos.x > BOARD_WIDTH*TILE_SIZE + TILE_SIZE && e->dir == RIGHT)
             e->pos.x = -TILE_SIZE;
         return;
     }
-
 
 
     /* only enter a new tile when your center has crossed the center of the new tile */
@@ -194,16 +198,25 @@ void move_towards_target(ghost_t *e) {
         bool options[4]; 
         available_directions(e, options);
 
-        float shortest = BOARD_HEIGHT*TILE_SIZE*69.0f; /* arbitrary sufficiently large number */
-        for (int dir=0; dir<4; ++dir) {
-            if (!options[dir]) continue;
+        if (e->frightened) {
+            int dir;
+            do {
+                dir = rand() % 4;
+            } while (!options[dir]);
+            e->dir = dir;
 
-            int tile = get_adjacent_tile(e->tile, dir);
+        } else {
+            float shortest = BOARD_HEIGHT*TILE_SIZE*69.0f; /* arbitrary sufficiently large number */
+            for (int dir=0; dir<4; ++dir) {
+                if (!options[dir]) continue;
 
-            float dist = dist_tiles(tile, e->target_tile);
-            if (dist < shortest) {
-                shortest = dist;
-                e->dir = dir;
+                int tile = get_adjacent_tile(e->tile, dir);
+
+                float dist = dist_tiles(tile, e->target_tile);
+                if (dist < shortest) {
+                    shortest = dist;
+                    e->dir = dir;
+                }
             }
         }
     }

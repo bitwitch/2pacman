@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <SDL2/SDL.h>
 #include "globals.h"
@@ -189,6 +190,7 @@ void update_ghostmode() {
                     game.ghostmode = CHASE;
                     printf("[INFO] Chase mode activated\n");
                 }
+                frighten_ghosts(false);
             }
             break;
 
@@ -212,6 +214,7 @@ void update_board(void) {
         game.score += 50;
         game.flee_timer = game.level > 18 ? 0 : flee_times[game.level-1]*SEC_TO_USEC;
         reverse_ghosts();
+        frighten_ghosts(true);
         game.prev_ghostmode = game.ghostmode;
         game.ghostmode = FLEE;
         printf("[INFO] Flee mode activated\n");
@@ -251,6 +254,8 @@ void init_game(void) {
 
 
 int main(int argc, char **argv) {
+    srand(0x94c3a2);
+
     init_game(); /* initializes global game object */
 
     init_board(board);

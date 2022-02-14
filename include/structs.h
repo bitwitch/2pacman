@@ -66,6 +66,7 @@ typedef struct {
     int frame;
     bool moving;
     bool reverse;
+    bool frightened;
     int tile;
     float speed;
     char c;            /* character that maps to my spritesheet location */
