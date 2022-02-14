@@ -1,14 +1,12 @@
 #include <SDL2/SDL.h>
 #include "globals.h"
 #include "render.h"
+#include "ghosts.h"
+#include "2pac.h"
 #include "stb_image.h"
 #include "stb_ds.h"
 
 extern SDL_Texture *spritesheet;
-
-/*SDL_Rect ghost_animation_frame(ghost_t *ghost) {*/
-    /*SDL_Rect srcrect = hmget(tilemap, ghost->c);*/
-/*}*/
 
 void render(char *board, int board_size, float interp) {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
@@ -32,9 +30,7 @@ void render(char *board, int board_size, float interp) {
     for (int i=0; i<GHOST_COUNT; ++i) {
         ghost_t *ghost = &ghosts[i];
 
-        /*SDL_Rect srcrect = get_animation_frame(ghost);*/
-        SDL_Rect srcrect = hmget(tilemap, ghost->c);
-
+        SDL_Rect srcrect = ghost_animation_frame(ghost);
         x = (int)(ghost->pos.x + 0.5) - TILE_SIZE;
         y = (int)(ghost->pos.y + 0.5) - TILE_SIZE;
         SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
@@ -57,7 +53,7 @@ void render(char *board, int board_size, float interp) {
         SDL_RenderDrawRect(game.renderer, &tile_rect);
     }
 
-    SDL_Rect srcrect = hmget(tilemap, pacman.c);
+    SDL_Rect srcrect = pacman_animation_frame();
     x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
     y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
     SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};

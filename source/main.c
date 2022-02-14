@@ -225,17 +225,23 @@ void init_entities() {
     ghosts[BLINKY].c = 'B';
     ghosts[BLINKY].pos.x = x; 
     ghosts[BLINKY].pos.y = y;
+    ghosts[BLINKY].w = 16;
+    ghosts[BLINKY].h = 16;
     ghosts[BLINKY].tile = tile_at(ghosts[BLINKY].pos);
     ghosts[BLINKY].speed = speed;
     ghosts[BLINKY].dir = LEFT;
     ghosts[BLINKY].moving = true;
     ghosts[BLINKY].state = NORMAL;
     ghosts[BLINKY].scatter_target_tile = 25;
+    ghosts[BLINKY].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    ghosts[BLINKY].anim_timer = ghosts[BLINKY].anim_frame_time;
 
     x = 95.0f; y = 140.0f;
     ghosts[INKY].c = 'I';
     ghosts[INKY].pos.x = x; 
     ghosts[INKY].pos.y = y;
+    ghosts[INKY].w = 16;
+    ghosts[INKY].h = 16;
     ghosts[INKY].tile = tile_at(ghosts[INKY].pos);
     ghosts[INKY].speed = speed;
     ghosts[INKY].dir = UP;
@@ -243,11 +249,15 @@ void init_entities() {
     ghosts[INKY].moving = true;
     ghosts[INKY].state = HOUSE_PARTY;
     ghosts[INKY].scatter_target_tile = 36*BOARD_WIDTH;
+    ghosts[INKY].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    ghosts[INKY].anim_timer = ghosts[INKY].anim_frame_time;
 
     x = 111.0f; y = 140.0f;
     ghosts[PINKY].c = 'P';
     ghosts[PINKY].pos.x = x; 
     ghosts[PINKY].pos.y = y;
+    ghosts[PINKY].w = 16;
+    ghosts[PINKY].h = 16;
     ghosts[PINKY].tile = tile_at(ghosts[PINKY].pos);
     ghosts[PINKY].speed = speed;
     ghosts[PINKY].dir = UP;
@@ -255,11 +265,15 @@ void init_entities() {
     ghosts[PINKY].moving = true;
     ghosts[PINKY].state = HOUSE_PARTY;
     ghosts[PINKY].scatter_target_tile = 2;
+    ghosts[PINKY].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    ghosts[PINKY].anim_timer = ghosts[PINKY].anim_frame_time;
 
     x = 127.0f; y = 140.0f;
     ghosts[CLYDE].c = 'C';
     ghosts[CLYDE].pos.x = x; 
     ghosts[CLYDE].pos.y = y;
+    ghosts[CLYDE].w = 16;
+    ghosts[CLYDE].h = 16;
     ghosts[CLYDE].tile = tile_at(ghosts[CLYDE].pos);
     ghosts[CLYDE].speed = speed;
     ghosts[CLYDE].dir = UP;
@@ -267,15 +281,21 @@ void init_entities() {
     ghosts[CLYDE].moving = true;
     ghosts[CLYDE].state = HOUSE_PARTY;
     ghosts[CLYDE].scatter_target_tile = 36*BOARD_WIDTH + 27;
+    ghosts[CLYDE].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    ghosts[CLYDE].anim_timer = ghosts[CLYDE].anim_frame_time;
 
     x = 111.0f; y = 212.0f;
     pacman.c = '>';
     pacman.pos.x = x;
     pacman.pos.y = y;
+    pacman.w = 16;
+    pacman.h = 16;
     pacman.tile = tile_at(pacman.pos);
     pacman.speed = speed;
     pacman.dir = LEFT;
     pacman.moving = false;
+    pacman.anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    pacman.anim_timer = pacman.anim_frame_time;
 }
 
 void init_game(void) {

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "globals.h"
 #include "vecs.h"
+#include "stb_ds.h"
 
 #define GHOST_HOUSE_EXIT_TILE ((112/TILE_SIZE) * BOARD_WIDTH + (104/TILE_SIZE))
 
@@ -208,54 +209,59 @@ void move_towards_target(ghost_t *e) {
     }
 }
 
-static void ghost_hover(ghost_t *e) {
-    if (e->dir == UP)
-        e->pos.y -= e->speed;
-    else if (e->dir == DOWN)
-        e->pos.y += e->speed;
+static void ghost_hover(ghost_t *g) {
+    if (g->dir == UP)
+        g->pos.y -= g->speed;
+    else if (g->dir == DOWN)
+        g->pos.y += g->speed;
 
     /* only enter a new tile when your center has crossed the center of the new tile */
-    v2f_t cur_tile_pos = get_tile_pos(e->tile);
-    if (vec2f_dist(cur_tile_pos, e->pos) >= TILE_SIZE) {
-        e->tile = tile_at(e->pos);
+    v2f_t cur_tile_pos = get_tile_pos(g->tile);
+    if (vec2f_dist(cur_tile_pos, g->pos) >= TILE_SIZE) {
+        g->tile = tile_at(g->pos);
 
-        int tile = get_adjacent_tile(e->tile, e->dir);
+        int tile = get_adjacent_tile(g->tile, g->dir);
         if (board[tile] != ' ')
-            e->dir = e->dir == UP ? DOWN : UP;
+            g->dir = g->dir == UP ? DOWN : UP;
     }
 }
 
 
-static void update_single_ghost(ghost_t *e) {
-    switch (e->state) {
+static void update_single_ghost(ghost_t *g) {
+    g->anim_timer -= TIME_STEP;
+    if (g->anim_timer <= 0) {
+        g->frame = g->frame ? 0 : 1;
+        g->anim_timer = g->anim_frame_time;
+    }
+
+    switch (g->state) {
         case HOUSE_PARTY:
-            ghost_hover(e);
-            if (e->ghost_house_timer - TIME_STEP < 0) {
-                e->ghost_house_timer = 0;
-                e->state = EXIT_HOUSE;
-                e->target_tile = GHOST_HOUSE_EXIT_TILE;
+            ghost_hover(g);
+            if (g->ghost_house_timer - TIME_STEP < 0) {
+                g->ghost_house_timer = 0;
+                g->state = EXIT_HOUSE;
+                g->target_tile = GHOST_HOUSE_EXIT_TILE;
                 printf("EXITING HOUSE\n");
             } else {
-                e->ghost_house_timer -= TIME_STEP;
+                g->ghost_house_timer -= TIME_STEP;
             }
             break;
 
         case EXIT_HOUSE:
-            move_towards_target(e);
-            if (e->tile == GHOST_HOUSE_EXIT_TILE) {
-                e->dir = LEFT;
-                e->state = NORMAL;
+            move_towards_target(g);
+            if (g->tile == GHOST_HOUSE_EXIT_TILE) {
+                g->dir = LEFT;
+                g->state = NORMAL;
                 if (game.ghostmode == SCATTER)
-                    e->target_tile = e->scatter_target_tile;
+                    g->target_tile = g->scatter_target_tile;
                 else if (game.ghostmode == CHASE)
                     /* NOTE(shaw): only really need to set one target here, but probably doesn't matter */
                     set_chase_targets();
-
             }
             break;
 
         case NORMAL:
-            move_towards_target(e);
+            move_towards_target(g);
             break;
     }
 }
@@ -266,6 +272,37 @@ void update_ghosts(void) {
 
     for (int i=0; i<GHOST_COUNT; ++i)
         update_single_ghost(&ghosts[i]);
+}
+
+SDL_Rect ghost_animation_frame(ghost_t *ghost) {
+    SDL_Rect rect;
+
+    /* flee mode */
+    if (game.ghostmode == FLEE) {
+        rect = hmget(tilemap, ghosts[BLINKY].c);
+        rect.x += 8*ghosts[BLINKY].w;
+        if (game.flee_timer <= 2*SEC_TO_USEC) {
+            int blink = game.flee_timer / (int64_t)125000;
+            if (blink % 2 == 0)
+                rect.x += 2*ghosts[BLINKY].w;
+        }
+
+    /* get sprite for each direction */
+    } else {
+        rect = hmget(tilemap, ghost->c);
+        if (ghost->dir == LEFT)
+            rect.x += 2*ghost->w;
+        else if (ghost->dir == UP)
+            rect.x += 4*ghost->w;
+        else if (ghost->dir == DOWN)
+            rect.x += 6*ghost->w;
+    }
+
+    /* get the correct frame for this animation */
+    if (ghost->frame == 1)
+        rect.x += ghost->w;
+    
+    return rect;
 }
 
 

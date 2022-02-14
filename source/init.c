@@ -136,7 +136,7 @@ void init_board(char *board) {
     SDL_Rect pinky  = {228, 80, 16, 16};  hmput(tilemap, 'P', pinky);
     SDL_Rect inky   = {228, 96, 16, 16};  hmput(tilemap, 'I', inky);
     SDL_Rect clyde  = {228, 112, 16, 16}; hmput(tilemap, 'C', clyde);
-    SDL_Rect pacman = {244, 16, 16, 16};  hmput(tilemap, '>', pacman);
+    SDL_Rect pacman = {228, 0, 16, 16};  hmput(tilemap, '>', pacman);
 }
 
 

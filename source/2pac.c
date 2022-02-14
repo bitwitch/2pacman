@@ -2,14 +2,15 @@
 #include <stdio.h>
 #include "globals.h"
 #include "vecs.h"
+#include "stb_ds.h"
 
-static bool forward_collide(pacman_t *e) {
+static bool forward_collide() {
     /* ignore collisions in tunnel, movement is restricted to left right anyway */
-    if (e->pos.x < TILE_SIZE || e->pos.x > (BOARD_WIDTH-1)*TILE_SIZE)
+    if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE)
         return false;
 
     /*check tile one ahead in travel direction*/
-    int front_tile = get_adjacent_tile(e->tile, e->dir);
+    int front_tile = get_adjacent_tile(pacman.tile, pacman.dir);
 
     /* ghost house door */
     if (board[front_tile] == 'n') return true;
@@ -18,7 +19,7 @@ static bool forward_collide(pacman_t *e) {
         return false;
     } else {
         v2f_t front_tile_pos = get_tile_pos(front_tile);
-        if (vec2f_dist(front_tile_pos, e->pos) > TILE_SIZE)
+        if (vec2f_dist(front_tile_pos, pacman.pos) > TILE_SIZE)
             return false;
     }
 
@@ -71,6 +72,14 @@ void update_2pac(void) {
         return;
     }
 
+    /* update animation frame */
+    pacman.anim_timer -= TIME_STEP;
+    if (pacman.anim_timer <= 0) {
+        if (++pacman.frame > 2)
+            pacman.frame = 0;
+        pacman.anim_timer = pacman.anim_frame_time;
+    }
+
     /* handle movement through the tunnel */
     if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
         if (pacman.dir == LEFT) { 
@@ -107,3 +116,26 @@ void update_2pac(void) {
         pacman.tile = next_tile;
     }
 }
+
+SDL_Rect pacman_animation_frame() {
+    SDL_Rect rect = hmget(tilemap, pacman.c);
+
+    if (pacman.frame == 0) {
+        rect.x += 2*pacman.w;
+        return rect;
+    }
+
+    if (pacman.dir == LEFT)
+        rect.y += 1*pacman.w;
+    else if (pacman.dir == UP)
+        rect.y += 2*pacman.w;
+    else if (pacman.dir == DOWN)
+        rect.y += 3*pacman.w;
+
+    if (pacman.frame == 2)
+        rect.x += pacman.w;
+
+    return rect;
+}
+
+

@@ -49,6 +49,8 @@ typedef enum {
 typedef struct {
     v2f_t pos;
     dir_e dir;
+    int w, h;
+    int frame;
     bool moving;
     bool reverse;
     int tile;
@@ -58,16 +60,20 @@ typedef struct {
     int scatter_target_tile;
     ghost_state_e state; 
     int64_t ghost_house_timer; 
+    int64_t anim_timer, anim_frame_time;
 } ghost_t;
 
 typedef struct {
     v2f_t pos;
     dir_e dir;
+    int w, h;
+    int frame;
     bool moving;
     int tile;
     float speed;
     char c;            /* character that maps to my spritesheet location */
     int target_tile;   /* the long term target tile i am heading towards */
+    int64_t anim_timer, anim_frame_time;
 } pacman_t;
 
 

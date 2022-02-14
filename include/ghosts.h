@@ -4,5 +4,6 @@
 void update_ghosts(void);
 void set_scatter_targets(void);
 void reverse_ghosts(void);
+SDL_Rect ghost_animation_frame(ghost_t *ghost);
 
 #endif

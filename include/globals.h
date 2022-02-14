@@ -17,9 +17,10 @@
 #define TILE_RENDER_SIZE (TILE_SIZE * SCALE)
 
 #define SEC_TO_USEC 1e6
+#define USEC_TO_SEC 1e-6
 
 #define TICRATE 60
-#define TIME_STEP ((int64_t)(SEC_TO_USEC / TICRATE))  /* microseconds per frame */
+#define TIME_STEP ((int64_t)SEC_TO_USEC / (int64_t)TICRATE)  /* microseconds per frame */
 
 
 enum {
