@@ -27,7 +27,6 @@ practice and hopefully learn some things. I decided to make a pacman clone.
   - After extracting the contents, copy the directory `x86_64-w64-mingw32` to a  
     directory called `SDL2` in this project    
 3. run `build`  
-4. run `cd build-windows && 2pacman`  
 
 ## macOS
 Not tested yet, though should work similar to Linux. Probably using clang  
