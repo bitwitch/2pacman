@@ -233,7 +233,7 @@ void init_entities() {
     ghosts[BLINKY].moving = true;
     ghosts[BLINKY].state = NORMAL;
     ghosts[BLINKY].scatter_target_tile = 25;
-    ghosts[BLINKY].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    ghosts[BLINKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     ghosts[BLINKY].anim_timer = ghosts[BLINKY].anim_frame_time;
 
     x = 95.0f; y = 140.0f;
@@ -249,7 +249,7 @@ void init_entities() {
     ghosts[INKY].moving = true;
     ghosts[INKY].state = HOUSE_PARTY;
     ghosts[INKY].scatter_target_tile = 36*BOARD_WIDTH;
-    ghosts[INKY].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    ghosts[INKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     ghosts[INKY].anim_timer = ghosts[INKY].anim_frame_time;
 
     x = 111.0f; y = 140.0f;
@@ -261,11 +261,11 @@ void init_entities() {
     ghosts[PINKY].tile = tile_at(ghosts[PINKY].pos);
     ghosts[PINKY].speed = speed;
     ghosts[PINKY].dir = UP;
+    ghosts[PINKY].state = HOUSE_PARTY;
     ghosts[PINKY].ghost_house_timer = 1 * SEC_TO_USEC;
     ghosts[PINKY].moving = true;
-    ghosts[PINKY].state = HOUSE_PARTY;
     ghosts[PINKY].scatter_target_tile = 2;
-    ghosts[PINKY].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    ghosts[PINKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     ghosts[PINKY].anim_timer = ghosts[PINKY].anim_frame_time;
 
     x = 127.0f; y = 140.0f;
@@ -277,9 +277,9 @@ void init_entities() {
     ghosts[CLYDE].tile = tile_at(ghosts[CLYDE].pos);
     ghosts[CLYDE].speed = speed;
     ghosts[CLYDE].dir = UP;
+    ghosts[CLYDE].state = HOUSE_PARTY;
     ghosts[CLYDE].ghost_house_timer = 7 * SEC_TO_USEC;
     ghosts[CLYDE].moving = true;
-    ghosts[CLYDE].state = HOUSE_PARTY;
     ghosts[CLYDE].scatter_target_tile = 36*BOARD_WIDTH + 27;
     ghosts[CLYDE].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
     ghosts[CLYDE].anim_timer = ghosts[CLYDE].anim_frame_time;
@@ -293,8 +293,8 @@ void init_entities() {
     pacman.tile = tile_at(pacman.pos);
     pacman.speed = speed;
     pacman.dir = LEFT;
-    pacman.moving = false;
-    pacman.anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
+    pacman.moving = true;
+    pacman.anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     pacman.anim_timer = pacman.anim_frame_time;
 }
 

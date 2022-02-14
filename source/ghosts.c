@@ -282,7 +282,7 @@ SDL_Rect ghost_animation_frame(ghost_t *ghost) {
         rect = hmget(tilemap, ghosts[BLINKY].c);
         rect.x += 8*ghosts[BLINKY].w;
         if (game.flee_timer <= 2*SEC_TO_USEC) {
-            int blink = game.flee_timer / (int64_t)125000;
+            int blink = game.flee_timer / 200000;
             if (blink % 2 == 0)
                 rect.x += 2*ghosts[BLINKY].w;
         }
