@@ -82,7 +82,9 @@ void init_board(char *board) {
     memcpy(board+offset, "4__________________________3", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "                            ", BOARD_WIDTH); offset += BOARD_WIDTH;
     memcpy(board+offset, "                            ", BOARD_WIDTH); offset += BOARD_WIDTH;
+}
 
+void init_tilemap(void) {
     SDL_Rect none       = {0, 88, 8, 8};    hmput(tilemap, ' ', none);
 
     SDL_Rect top_wall   = {8, 0, 8, 8};     hmput(tilemap, '^', top_wall);

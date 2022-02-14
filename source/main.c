@@ -223,6 +223,14 @@ void update_board(void) {
     if (game.dots_remaining == 0) {
         /* TODO(shaw): level completed */
         printf("Level %d completed!\n", game.level);
+        ++game.level;
+        game.dots_remaining = DOT_COUNT;
+        set_ghostmode_timer();
+        game.intro_timer = 2 * SEC_TO_USEC;
+        init_board(board);
+        init_entities();
+        frighten_ghosts(false);
+        game.ghostmode = SCATTER;
     }
 }
 
@@ -259,6 +267,7 @@ int main(int argc, char **argv) {
     init_game(); /* initializes global game object */
 
     init_board(board);
+    init_tilemap();
     init_alphabet();
     init_entities();
 
