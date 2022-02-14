@@ -8,7 +8,25 @@
 
 extern SDL_Texture *spritesheet;
 
-void render(char *board, int board_size, float interp) {
+static void draw_menu_item(menu_intro_item_t *item) {
+    for (int i=0; i<item->rect_count; ++i)
+        SDL_RenderCopy(game.renderer, spritesheet, &(item->srcrects[i]), &(item->dstrects[i]));
+}
+
+void render_menu(float interp) {
+    SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
+    SDL_RenderClear(game.renderer);
+
+    for (int i=0; i<ARRAY_COUNT(menu_intro_items); ++i) {
+        menu_intro_item_t *item = &menu_intro_items[i];
+        if (game.intro_timer < (int64_t)(item->start_time*SEC_TO_USEC))
+            draw_menu_item(item);
+    }
+                  
+    SDL_RenderPresent(game.renderer);
+}
+
+void render_game(char *board, int board_size, float interp) {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     SDL_RenderClear(game.renderer);
 

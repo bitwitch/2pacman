@@ -3,5 +3,8 @@
 
 void init_sdl(void);
 void init_board(char *board);
+void init_entities(void);
+void init_menu_intro(void);
+void init_alphabet(void);
 
 #endif

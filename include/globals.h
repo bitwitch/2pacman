@@ -22,6 +22,7 @@
 #define TICRATE 60
 #define TIME_STEP ((int64_t)SEC_TO_USEC / (int64_t)TICRATE)  /* microseconds per frame */
 
+#define ARRAY_COUNT(a) (sizeof(a) / sizeof(a[0]))
 
 enum {
     BLINKY = 0,
@@ -35,7 +36,9 @@ extern game_t game;
 extern ghost_t ghosts[GHOST_COUNT];
 extern pacman_t pacman;
 extern tilemap_t *tilemap;
+extern alphabet_t *alphabet;
 extern char board[BOARD_WIDTH*BOARD_HEIGHT];
+extern menu_intro_item_t menu_intro_items[12];
 
 
 #endif

@@ -7,6 +7,11 @@
 #include "vecs.h"
 
 typedef enum {
+    MAIN_MENU,
+    GAME
+} mode_e;
+
+typedef enum {
     SCATTER,
     CHASE,
     FLEE
@@ -15,10 +20,12 @@ typedef enum {
 typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
-    bool up,down,left,right;
+    bool up,down,left,right,enter;
+    mode_e mode;
     ghostmode_e ghostmode, prev_ghostmode;
     int64_t ghostmode_timer;
     int64_t flee_timer;
+    int64_t intro_timer;
     int level;
     int phase;
     bool quit;
@@ -32,6 +39,12 @@ typedef struct {
     char key;
     SDL_Rect value;
 } tilemap_t;
+
+/* used for hashmap from alpha characters to tiles */
+typedef struct {
+    char key;
+    SDL_Rect value;
+} alphabet_t;
 
 typedef enum {
     UP = 0,
@@ -76,6 +89,15 @@ typedef struct {
     int64_t anim_timer, anim_frame_time;
 } pacman_t;
 
+typedef struct {
+    bool show;
+    float start_time;    /* in seconds */
+    int size;
+    v2f_t start_pos;
+    SDL_Rect srcrects[12];
+    SDL_Rect dstrects[12];
+    int rect_count;
+} menu_intro_item_t;
 
 
 #endif

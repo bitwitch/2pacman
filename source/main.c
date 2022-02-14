@@ -22,6 +22,7 @@ double delta, accumulator;
 game_t game = {0};
 char board[BOARD_WIDTH*BOARD_HEIGHT] = {0};
 tilemap_t *tilemap = NULL;
+alphabet_t *alphabet = NULL;
 SDL_Texture *spritesheet;
 ghost_t ghosts[GHOST_COUNT] = {0};
 pacman_t pacman;
@@ -75,6 +76,9 @@ void do_input(void) {
                 case SDL_SCANCODE_RIGHT:
                     game.right = event.type == SDL_KEYDOWN;
                     break;
+                case SDL_SCANCODE_RETURN:
+                    game.enter = event.type == SDL_KEYDOWN;
+                    break;
                 default:
                     break;
                 }
@@ -88,8 +92,7 @@ void do_input(void) {
     }
 }
 
-
-void set_ghostmode_timer() {
+static void set_ghostmode_timer(void) {
     static float phases[3][8] = {
        {7,20,7,20,5,20,5,-1},
        {7,20,7,20,5,1033,1/60,-1},
@@ -107,6 +110,18 @@ void set_ghostmode_timer() {
         game.ghostmode_timer = phases[1][game.phase] * SEC_TO_USEC;
     else 
         game.ghostmode_timer = phases[2][game.phase] * SEC_TO_USEC;
+}
+
+static void update_main_menu(void) {
+    if (game.intro_timer < 12 * SEC_TO_USEC) {
+
+    }
+
+    game.intro_timer -= TIME_STEP;
+    if (game.enter) {
+        game.mode = GAME;
+        game.intro_timer = 2 * SEC_TO_USEC;
+    }
 }
 
 /*
@@ -210,96 +225,23 @@ void update_board(void) {
 
 void update(void) {
     do_input();
-    update_ghostmode();
-    update_ghosts();
-    update_2pac();
-    update_board();
+    if (game.mode == MAIN_MENU) {
+        update_main_menu();
+    } else {
+        if (game.intro_timer > 0) {
+            game.intro_timer -= TIME_STEP;
+        } else {
+            update_ghostmode();
+            update_ghosts();
+            update_2pac();
+            update_board();
+        }
+    }
 }
-
-
-void init_entities() {
-    float x,y;
-    float speed = 0.814159;
-
-    x = 111.0f; y = 116.0f;
-    ghosts[BLINKY].c = 'B';
-    ghosts[BLINKY].pos.x = x; 
-    ghosts[BLINKY].pos.y = y;
-    ghosts[BLINKY].w = 16;
-    ghosts[BLINKY].h = 16;
-    ghosts[BLINKY].tile = tile_at(ghosts[BLINKY].pos);
-    ghosts[BLINKY].speed = speed;
-    ghosts[BLINKY].dir = LEFT;
-    ghosts[BLINKY].moving = true;
-    ghosts[BLINKY].state = NORMAL;
-    ghosts[BLINKY].scatter_target_tile = 25;
-    ghosts[BLINKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
-    ghosts[BLINKY].anim_timer = ghosts[BLINKY].anim_frame_time;
-
-    x = 95.0f; y = 140.0f;
-    ghosts[INKY].c = 'I';
-    ghosts[INKY].pos.x = x; 
-    ghosts[INKY].pos.y = y;
-    ghosts[INKY].w = 16;
-    ghosts[INKY].h = 16;
-    ghosts[INKY].tile = tile_at(ghosts[INKY].pos);
-    ghosts[INKY].speed = speed;
-    ghosts[INKY].dir = UP;
-    ghosts[INKY].ghost_house_timer = 4 * SEC_TO_USEC;
-    ghosts[INKY].moving = true;
-    ghosts[INKY].state = HOUSE_PARTY;
-    ghosts[INKY].scatter_target_tile = 36*BOARD_WIDTH;
-    ghosts[INKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
-    ghosts[INKY].anim_timer = ghosts[INKY].anim_frame_time;
-
-    x = 111.0f; y = 140.0f;
-    ghosts[PINKY].c = 'P';
-    ghosts[PINKY].pos.x = x; 
-    ghosts[PINKY].pos.y = y;
-    ghosts[PINKY].w = 16;
-    ghosts[PINKY].h = 16;
-    ghosts[PINKY].tile = tile_at(ghosts[PINKY].pos);
-    ghosts[PINKY].speed = speed;
-    ghosts[PINKY].dir = UP;
-    ghosts[PINKY].state = HOUSE_PARTY;
-    ghosts[PINKY].ghost_house_timer = 1 * SEC_TO_USEC;
-    ghosts[PINKY].moving = true;
-    ghosts[PINKY].scatter_target_tile = 2;
-    ghosts[PINKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
-    ghosts[PINKY].anim_timer = ghosts[PINKY].anim_frame_time;
-
-    x = 127.0f; y = 140.0f;
-    ghosts[CLYDE].c = 'C';
-    ghosts[CLYDE].pos.x = x; 
-    ghosts[CLYDE].pos.y = y;
-    ghosts[CLYDE].w = 16;
-    ghosts[CLYDE].h = 16;
-    ghosts[CLYDE].tile = tile_at(ghosts[CLYDE].pos);
-    ghosts[CLYDE].speed = speed;
-    ghosts[CLYDE].dir = UP;
-    ghosts[CLYDE].state = HOUSE_PARTY;
-    ghosts[CLYDE].ghost_house_timer = 7 * SEC_TO_USEC;
-    ghosts[CLYDE].moving = true;
-    ghosts[CLYDE].scatter_target_tile = 36*BOARD_WIDTH + 27;
-    ghosts[CLYDE].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;
-    ghosts[CLYDE].anim_timer = ghosts[CLYDE].anim_frame_time;
-
-    x = 111.0f; y = 212.0f;
-    pacman.c = '>';
-    pacman.pos.x = x;
-    pacman.pos.y = y;
-    pacman.w = 16;
-    pacman.h = 16;
-    pacman.tile = tile_at(pacman.pos);
-    pacman.speed = speed;
-    pacman.dir = LEFT;
-    pacman.moving = true;
-    pacman.anim_frame_time = (int64_t)SEC_TO_USEC / 15;
-    pacman.anim_timer = pacman.anim_frame_time;
-}
-
 void init_game(void) {
     init_sdl();
+    game.mode = MAIN_MENU;
+    game.intro_timer = 12 * SEC_TO_USEC;
     game.ghostmode = SCATTER;
     game.level = 1;
     set_ghostmode_timer();
@@ -307,13 +249,17 @@ void init_game(void) {
     /* the rest of the fields should have been zero initialized, game = {0}; */
 }
 
+
 int main(int argc, char **argv) {
     init_game(); /* initializes global game object */
 
     init_board(board);
+    init_alphabet();
     init_entities();
 
     spritesheet = load_texture("assets/spritesheet.png");
+
+    init_menu_intro();
 
     set_scatter_targets();
 
@@ -333,7 +279,10 @@ int main(int argc, char **argv) {
 
         float interp = accumulator / TIME_STEP;
 
-        render(board, BOARD_WIDTH*BOARD_HEIGHT, interp);
+        if (game.mode == MAIN_MENU)
+            render_menu(interp);
+        else 
+            render_game(board, BOARD_WIDTH*BOARD_HEIGHT, interp);
     }
 
     return 0;
