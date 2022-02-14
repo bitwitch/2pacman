@@ -13,6 +13,19 @@ static void draw_menu_item(menu_intro_item_t *item) {
         SDL_RenderCopy(game.renderer, spritesheet, &(item->srcrects[i]), &(item->dstrects[i]));
 }
 
+static void draw_hud_item(sprite_row_t *item) {
+    for (int i=0; i<item->rect_count; ++i)
+        SDL_RenderCopy(game.renderer, spritesheet, &(item->srcrects[i]), &(item->dstrects[i]));
+}
+
+static void render_hud(float interp) {
+    for (int i=0; i<ARRAY_COUNT(hud_items); ++i) {
+        sprite_row_t *item = &hud_items[i];
+        if (item->show)
+            draw_hud_item(item);
+    }
+}
+
 void render_menu(float interp) {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     SDL_RenderClear(game.renderer);
@@ -22,6 +35,8 @@ void render_menu(float interp) {
         if (game.intro_timer < (int64_t)(item->start_time*SEC_TO_USEC))
             draw_menu_item(item);
     }
+
+    render_hud(interp);
                   
     SDL_RenderPresent(game.renderer);
 }
@@ -36,7 +51,7 @@ void render_game(char *board, int board_size, float interp) {
         x = i % BOARD_WIDTH;
         y = i / BOARD_WIDTH;
         SDL_Rect srcrect = hmget(tilemap, board[i]);
-        SDL_Rect dstrect = {.x = x*TILE_RENDER_SIZE+15, .y = y*TILE_RENDER_SIZE+15, .w = TILE_RENDER_SIZE, .h = TILE_RENDER_SIZE};
+        SDL_Rect dstrect = {.x = x*TILE_RENDER_SIZE, .y = y*TILE_RENDER_SIZE, .w = TILE_RENDER_SIZE, .h = TILE_RENDER_SIZE};
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
         if (i == pacman.tile) {
             SDL_SetRenderDrawColor(game.renderer, 0, 255, 0, 255);
@@ -51,7 +66,7 @@ void render_game(char *board, int board_size, float interp) {
         SDL_Rect srcrect = ghost_animation_frame(ghost);
         x = (int)(ghost->pos.x + 0.5) - TILE_SIZE;
         y = (int)(ghost->pos.y + 0.5) - TILE_SIZE;
-        SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
+        SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
 
         /* TEMPORARILY DRAW THE TARGET TILES */
@@ -63,8 +78,8 @@ void render_game(char *board, int board_size, float interp) {
         }
         v2f_t tile_pos = get_tile_pos(ghost->target_tile);
         SDL_Rect tile_rect = {
-            .x = (tile_pos.x-0.5*TILE_SIZE)*SCALE+15, 
-            .y = (tile_pos.y-0.5*TILE_SIZE)*SCALE+15, 
+            .x = (tile_pos.x-0.5*TILE_SIZE)*SCALE, 
+            .y = (tile_pos.y-0.5*TILE_SIZE)*SCALE, 
             .w = TILE_RENDER_SIZE, 
             .h = TILE_RENDER_SIZE
         };
@@ -74,8 +89,10 @@ void render_game(char *board, int board_size, float interp) {
     SDL_Rect srcrect = pacman_animation_frame();
     x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
     y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
-    SDL_Rect dstrect = {.x = x*SCALE+15, .y = y*SCALE+15, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
+    SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
     SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+
+    render_hud(interp);
 
     SDL_RenderPresent(game.renderer);
 }

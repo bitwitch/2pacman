@@ -9,7 +9,6 @@
 #include "2pac.h"
 #include "render.h"
 #include "init.h"
-#include "structs.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -266,13 +265,14 @@ int main(int argc, char **argv) {
 
     init_game(); /* initializes global game object */
 
+    spritesheet = load_texture("assets/spritesheet.png");
+
     init_board(board);
     init_tilemap();
     init_alphabet();
     init_entities();
 
-    spritesheet = load_texture("assets/spritesheet.png");
-
+    init_hud();
     init_menu_intro();
 
     set_scatter_targets();
