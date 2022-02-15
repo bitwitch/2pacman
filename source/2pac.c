@@ -45,8 +45,24 @@ static void available_directions(bool options[4]) {
 
 }
 
+static void update_dead_2pac(void) {
+    /* update animation frame */
+    pacman.anim_timer -= 0.5*TIME_STEP;
+    if (pacman.anim_timer <= 0) {
+        if (++pacman.frame > 11)
+            restart_from_death();
+        pacman.anim_timer = pacman.anim_frame_time;
+    }
+}
 
 void update_2pac(void) {
+    if (pacman.dead) {
+        pacman.death_timer -= TIME_STEP;
+        if (pacman.death_timer < 0)
+            update_dead_2pac();
+        return;
+    }
+
     bool options[4];
     available_directions(options);
 
@@ -119,6 +135,11 @@ void update_2pac(void) {
 
 SDL_Rect pacman_animation_frame() {
     SDL_Rect rect = hmget(tilemap, pacman.c);
+
+    if (pacman.dead && pacman.death_timer < 0) {
+        rect.x += (3+pacman.frame)*pacman.w;
+        return rect;
+    }
 
     if (pacman.frame == 0) {
         rect.x += 2*pacman.w;

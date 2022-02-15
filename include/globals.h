@@ -49,8 +49,14 @@ typedef enum {
 } ghostmode_e;
 
 typedef struct {
+    uint64_t cur_time, prev_time;
+    double delta, accumulator;
+} timer_t;
+
+typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
+    timer_t timer;
     bool up,down,left,right,enter;
     mode_e mode;
     ghostmode_e ghostmode, prev_ghostmode;
@@ -63,7 +69,6 @@ typedef struct {
     int dots_remaining;
     int score;
 } game_t;
-
 
 /* used for hashmap from characters to tiles */
 typedef struct {
@@ -113,12 +118,15 @@ typedef struct {
     dir_e dir;
     int w, h;
     int frame;
+    int lives;
     bool moving;
+    bool dead;
     int tile;
     float speed;
     char c;            /* character that maps to my spritesheet location */
-    int target_tile;   /* the long term target tile i am heading towards */
-    int64_t anim_timer, anim_frame_time;
+    int target_tile; 
+    float death_duration; /* in seconds */
+    int64_t anim_timer, anim_frame_time, death_timer;
 } pacman_t;
 
 typedef struct {
@@ -140,12 +148,17 @@ typedef struct {
     int rect_count;
 } sprite_row_t;
 
+void restart_from_death(void);
 
 extern game_t game;
 extern ghost_t ghosts[GHOST_COUNT];
 extern pacman_t pacman;
 extern tilemap_t *tilemap;
 extern alphabet_t *alphabet;
+extern alphabet_t *alphabet_r;
+extern alphabet_t *alphabet_p;
+extern alphabet_t *alphabet_o;
+extern alphabet_t *alphabet_b;
 extern char board[BOARD_WIDTH*BOARD_HEIGHT];
 extern menu_intro_item_t menu_intro_items[MAX_INTRO_ITEMS];
 extern sprite_row_t hud_items[MAX_HUD_ITEMS];

@@ -59,38 +59,41 @@ void render_game(char *board, int board_size, float interp) {
         }
     }
 
-    /* render entities */
-    for (int i=0; i<GHOST_COUNT; ++i) {
-        ghost_t *ghost = &ghosts[i];
-
-        SDL_Rect srcrect = ghost_animation_frame(ghost);
-        x = (int)(ghost->pos.x + 0.5) - TILE_SIZE;
-        y = (int)(ghost->pos.y + 0.5) - TILE_SIZE;
-        SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
-        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
-
-        /* TEMPORARILY DRAW THE TARGET TILES */
-        switch (i) {
-        case BLINKY: SDL_SetRenderDrawColor(game.renderer, 255, 0, 0, 255); break;
-        case PINKY: SDL_SetRenderDrawColor(game.renderer, 229, 126, 252, 255); break;
-        case INKY: SDL_SetRenderDrawColor(game.renderer, 200, 242, 252, 255); break;
-        case CLYDE: SDL_SetRenderDrawColor(game.renderer, 252, 165, 65, 255); break;
-        }
-        v2f_t tile_pos = get_tile_pos(ghost->target_tile);
-        SDL_Rect tile_rect = {
-            .x = (tile_pos.x-0.5*TILE_SIZE)*SCALE, 
-            .y = (tile_pos.y-0.5*TILE_SIZE)*SCALE, 
-            .w = TILE_RENDER_SIZE, 
-            .h = TILE_RENDER_SIZE
-        };
-        SDL_RenderDrawRect(game.renderer, &tile_rect);
-    }
-
+    /* render pacman */
     SDL_Rect srcrect = pacman_animation_frame();
     x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
     y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
     SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
     SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+
+    if (!(pacman.dead && pacman.death_timer < 0)) {
+        /* render entities */
+        for (int i=0; i<GHOST_COUNT; ++i) {
+            ghost_t *ghost = &ghosts[i];
+
+            SDL_Rect srcrect = ghost_animation_frame(ghost);
+            x = (int)(ghost->pos.x + 0.5) - TILE_SIZE;
+            y = (int)(ghost->pos.y + 0.5) - TILE_SIZE;
+            SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
+            SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+
+            /* TEMPORARILY DRAW THE TARGET TILES */
+            switch (i) {
+            case BLINKY: SDL_SetRenderDrawColor(game.renderer, 255, 0, 0, 255); break;
+            case PINKY: SDL_SetRenderDrawColor(game.renderer, 229, 126, 252, 255); break;
+            case INKY: SDL_SetRenderDrawColor(game.renderer, 200, 242, 252, 255); break;
+            case CLYDE: SDL_SetRenderDrawColor(game.renderer, 252, 165, 65, 255); break;
+            }
+            v2f_t tile_pos = get_tile_pos(ghost->target_tile);
+            SDL_Rect tile_rect = {
+                .x = (tile_pos.x-0.5*TILE_SIZE)*SCALE, 
+                .y = (tile_pos.y-0.5*TILE_SIZE)*SCALE, 
+                .w = TILE_RENDER_SIZE, 
+                .h = TILE_RENDER_SIZE
+            };
+            SDL_RenderDrawRect(game.renderer, &tile_rect);
+        }
+    }
 
     render_hud(interp);
 

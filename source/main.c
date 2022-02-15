@@ -15,14 +15,8 @@
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
-
-uint64_t cur_time, prev_time;
-double delta, accumulator;
-
 game_t game = {0};
 char board[BOARD_WIDTH*BOARD_HEIGHT] = {0};
-tilemap_t *tilemap = NULL;
-alphabet_t *alphabet = NULL;
 SDL_Texture *spritesheet;
 ghost_t ghosts[GHOST_COUNT] = {0};
 pacman_t pacman;
@@ -45,9 +39,9 @@ uint64_t get_time(void)
 }
 
 void tick (void) {
-    prev_time = cur_time;
-    cur_time = get_time();
-    delta = (double)(cur_time - prev_time);
+    game.timer.prev_time = game.timer.cur_time;
+    game.timer.cur_time = get_time();
+    game.timer.delta = (double)(game.timer.cur_time - game.timer.prev_time);
 }
 
 
@@ -230,11 +224,40 @@ void update_board(void) {
         init_entities();
         frighten_ghosts(false);
         game.ghostmode = SCATTER;
+
+    }
+}
+
+static void game_over(void) {
+    
+}
+
+void restart_from_death(void) {
+    set_ghostmode_timer();
+    game.intro_timer = 2 * SEC_TO_USEC;
+    init_entities();
+    frighten_ghosts(false);
+    game.ghostmode = SCATTER;
+    pacman.dead = false;
+}
+
+static void check_ghost_collision(void) {
+    if (pacman.dead) return;
+    for (int i=0; i<GHOST_COUNT; ++i) {
+        if (pacman.tile == ghosts[i].tile) {
+            pacman.dead = true;
+            pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
+            pacman.anim_timer = pacman.anim_frame_time;
+            pacman.frame = 0;
+            if (--pacman.lives < 0)
+                game_over();
+        }
     }
 }
 
 void update(void) {
     do_input();
+
     if (game.mode == MAIN_MENU) {
         update_main_menu();
     } else {
@@ -245,9 +268,11 @@ void update(void) {
             update_ghosts();
             update_2pac();
             update_board();
+            check_ghost_collision();
         }
     }
 }
+
 void init_game(void) {
     init_sdl();
     game.mode = MAIN_MENU;
@@ -277,21 +302,16 @@ int main(int argc, char **argv) {
 
     set_scatter_targets();
 
-    cur_time = 0;
-    prev_time = 0;
-    delta = 0;
-    accumulator = 0;
-
     while(!game.quit) {
         tick();
 
-        accumulator += delta;
-        while (accumulator > TIME_STEP) {
+        game.timer.accumulator += game.timer.delta;
+        while (game.timer.accumulator > TIME_STEP) {
             update();
-            accumulator -= TIME_STEP;
+            game.timer.accumulator -= TIME_STEP;
         }
 
-        float interp = accumulator / TIME_STEP;
+        float interp = game.timer.accumulator / TIME_STEP;
 
         if (game.mode == MAIN_MENU)
             render_menu(interp);

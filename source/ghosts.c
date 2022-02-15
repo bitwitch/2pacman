@@ -247,6 +247,8 @@ static void update_single_ghost(ghost_t *g) {
         g->anim_timer = g->anim_frame_time;
     }
 
+    if (pacman.dead) return;
+
     switch (g->state) {
         case HOUSE_PARTY:
             ghost_hover(g);
