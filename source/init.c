@@ -684,6 +684,7 @@ void init_entities(void) {
     float speed = 0.814159;
 
     x = 111.0f; y = 116.0f;
+    ghosts[BLINKY].id = BLINKY;
     ghosts[BLINKY].c = 'B';
     ghosts[BLINKY].pos.x = x; 
     ghosts[BLINKY].pos.y = y;
@@ -700,6 +701,7 @@ void init_entities(void) {
     ghosts[BLINKY].anim_timer = ghosts[BLINKY].anim_frame_time;
 
     x = 111.0f; y = 140.0f;
+    ghosts[PINKY].id = PINKY;
     ghosts[PINKY].c = 'P';
     ghosts[PINKY].pos.x = x; 
     ghosts[PINKY].pos.y = y;
@@ -717,6 +719,7 @@ void init_entities(void) {
     ghosts[PINKY].anim_timer = ghosts[PINKY].anim_frame_time;
 
     x = 95.0f; y = 140.0f;
+    ghosts[INKY].id = INKY;
     ghosts[INKY].c = 'I';
     ghosts[INKY].pos.x = x; 
     ghosts[INKY].pos.y = y;
@@ -734,6 +737,7 @@ void init_entities(void) {
     ghosts[INKY].anim_timer = ghosts[INKY].anim_frame_time;
 
     x = 127.0f; y = 140.0f;
+    ghosts[CLYDE].id = CLYDE;
     ghosts[CLYDE].c = 'C';
     ghosts[CLYDE].pos.x = x; 
     ghosts[CLYDE].pos.y = y;

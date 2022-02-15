@@ -99,6 +99,7 @@ typedef enum {
 typedef struct {
     v2f_t pos;
     dir_e dir;
+    int id;
     int w, h;
     int frame;
     bool moving;

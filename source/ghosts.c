@@ -108,11 +108,11 @@ static void set_chase_targets(void) {
 }
 
 static void set_chase_target(ghost_t *e) {
-    switch(e->c) {
-        case 'B': set_blinky_chase_target(); break;
-        case 'P': set_pinky_chase_target(); break;
-        case 'I': set_inky_chase_target(); break;
-        case 'C': set_clyde_chase_target(); break;
+    switch(e->id) {
+        case BLINKY: set_blinky_chase_target(); break;
+        case PINKY:  set_pinky_chase_target();  break;
+        case INKY:   set_inky_chase_target();   break;
+        case CLYDE:  set_clyde_chase_target();  break;
         default: break;
     }
 }

@@ -244,10 +244,10 @@ void restart_from_death(void) {
 static void check_ghost_collision(void) {
     if (pacman.dead) return;
     for (int i=0; i<GHOST_COUNT; ++i) {
-        if (ghosts[i].state == GO_HOME) continue;
+        if (ghosts[i].state == GO_HOME) 
+            continue;
         if (tile_at(pacman.pos) == ghosts[i].tile) {
             if (ghosts[i].frightened) {
-                printf("GOTCHA!\n");
                 ghosts[i].target_tile = ghosts[i].respawn_tile;
                 ghosts[i].state = GO_HOME;
                 ghosts[i].frightened = false;
