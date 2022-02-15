@@ -6,7 +6,6 @@
 
 #define GHOST_HOUSE_EXIT_TILE ((112/TILE_SIZE) * BOARD_WIDTH + (104/TILE_SIZE))
 
-
 void set_scatter_targets(void) {
     for (int i=0; i<GHOST_COUNT; ++i)
         if (ghosts[i].state != EXIT_HOUSE && ghosts[i].state != GO_HOME)
@@ -46,8 +45,13 @@ static void set_pinky_chase_target(void) {
                 break;
             case UP: 
                 target_tile = pacman.tile - 4*BOARD_WIDTH - 4; 
-                /* TODO(shaw): handle if target wraps the board on the left
-                 * because of the left offset */
+                v2f_t offset = {-4.0f*TILE_SIZE, -4.0f*TILE_SIZE};
+                v2f_t target_pos = vec2f_add(offset, get_tile_pos(pacman.tile));
+                /* handle if target wraps the board */
+                if (target_pos.x < 0) {
+                    int row = (target_tile+4) / BOARD_WIDTH;
+                    target_tile = row*BOARD_WIDTH;
+                }
                 break;
             default: 
                 assert(false && "unknown dir in set_chase_targets");
@@ -77,16 +81,22 @@ static void set_inky_chase_target(void) {
         v2f_t blinky_to_ahead = vec2f_sub(ahead_tile_pos, blinky_pos);
         v2f_t target_pos = vec2f_add(blinky_pos, vec2f_scale(blinky_to_ahead, 2));
 
+        /* handle when target tile wraps the board*/
         if (target_pos.x > BOARD_WIDTH*TILE_SIZE) {
             v2f_t right = {1, 0};
             float cos_angle = vec2f_dot(right, vec2f_norm(blinky_to_ahead));
             float scale = (BOARD_WIDTH*TILE_SIZE - 0.5*TILE_SIZE - blinky_pos.x) / cos_angle;
             blinky_to_ahead = vec2f_scale(vec2f_norm(blinky_to_ahead), scale);
             target_pos = vec2f_add(blinky_pos, blinky_to_ahead);
+        } else if (target_pos.x < 0) {
+            v2f_t left = {-1, 0};
+            float cos_angle = vec2f_dot(left, vec2f_norm(blinky_to_ahead));
+            float scale = blinky_pos.x / cos_angle;
+            blinky_to_ahead = vec2f_scale(vec2f_norm(blinky_to_ahead), scale);
+            target_pos = vec2f_add(blinky_pos, blinky_to_ahead);
         }
 
         ghosts[INKY].target_tile = tile_at(target_pos);
-        /* TODO(shaw): need to handle if the target tile wraps the board */
     }
 }
 

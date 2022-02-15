@@ -70,7 +70,6 @@ void render_game(char *board, int board_size, float interp) {
         /* render ghosts */
         for (int i=0; i<GHOST_COUNT; ++i) {
             ghost_t *ghost = &ghosts[i];
-
             if (!ghost->show) continue;
 
             SDL_Rect srcrect = ghost_animation_frame(ghost);

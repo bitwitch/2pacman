@@ -265,6 +265,7 @@ static void check_ghost_collision(void) {
                 show_eat_points(game.ghosts_eaten, ghosts[i].pos);
                 ++game.ghosts_eaten;
             } else {
+#ifndef INVINCIBLE
                 pacman.dead = true;
                 pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
                 pacman.anim_timer = pacman.anim_frame_time;
@@ -272,6 +273,7 @@ static void check_ghost_collision(void) {
                 if (--pacman.lives < 0)
                     game_over();
                 break;
+#endif
             }
         }
     }
