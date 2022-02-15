@@ -695,6 +695,7 @@ void init_entities(void) {
     ghosts[BLINKY].moving = true;
     ghosts[BLINKY].state = NORMAL;
     ghosts[BLINKY].scatter_target_tile = 25;
+    ghosts[BLINKY].respawn_tile = 490;
     ghosts[BLINKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     ghosts[BLINKY].anim_timer = ghosts[BLINKY].anim_frame_time;
 
@@ -711,6 +712,7 @@ void init_entities(void) {
     ghosts[PINKY].ghost_house_timer = 1 * SEC_TO_USEC;
     ghosts[PINKY].moving = true;
     ghosts[PINKY].scatter_target_tile = 2;
+    ghosts[PINKY].respawn_tile = 490;
     ghosts[PINKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     ghosts[PINKY].anim_timer = ghosts[PINKY].anim_frame_time;
 
@@ -727,6 +729,7 @@ void init_entities(void) {
     ghosts[INKY].moving = true;
     ghosts[INKY].state = HOUSE_PARTY;
     ghosts[INKY].scatter_target_tile = (BOARD_HEIGHT-1)*BOARD_WIDTH + (BOARD_WIDTH-1);
+    ghosts[INKY].respawn_tile = 489;
     ghosts[INKY].anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     ghosts[INKY].anim_timer = ghosts[INKY].anim_frame_time;
 
@@ -741,6 +744,7 @@ void init_entities(void) {
     ghosts[CLYDE].dir = UP;
     ghosts[CLYDE].state = HOUSE_PARTY;
     ghosts[CLYDE].scatter_target_tile = (BOARD_HEIGHT-1)*BOARD_WIDTH;
+    ghosts[CLYDE].respawn_tile = 491;
     ghosts[CLYDE].ghost_house_timer = 7 * SEC_TO_USEC;
     ghosts[CLYDE].moving = true;
     ghosts[CLYDE].anim_frame_time = (int64_t)SEC_TO_USEC / (int64_t)15;

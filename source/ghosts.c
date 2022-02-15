@@ -9,7 +9,8 @@
 
 void set_scatter_targets(void) {
     for (int i=0; i<GHOST_COUNT; ++i)
-        ghosts[i].target_tile = ghosts[i].scatter_target_tile;
+        if (ghosts[i].state != EXIT_HOUSE && ghosts[i].state != GO_HOME)
+            ghosts[i].target_tile = ghosts[i].scatter_target_tile;
 }
 
 /* TODO(shaw): investigate using padding on all sides of the board, and using a
@@ -17,14 +18,14 @@ void set_scatter_targets(void) {
  * example calculating chase targets 
  */
 
-static void set_chase_targets(void) {
-    /* BLINKY */
-    if (ghosts[BLINKY].state != EXIT_HOUSE) {
+static void set_blinky_chase_target(void) {
+    if (ghosts[BLINKY].state != EXIT_HOUSE && ghosts[BLINKY].state != GO_HOME) {
         ghosts[BLINKY].target_tile = pacman.tile;
     }
+}
 
-    /* PINKY */
-    if (ghosts[PINKY].state != EXIT_HOUSE) {
+static void set_pinky_chase_target(void) {
+    if (ghosts[PINKY].state != EXIT_HOUSE && ghosts[PINKY].state != GO_HOME) {
         int pacman_row = pacman.tile / BOARD_WIDTH;
         int target_tile;
         switch (pacman.dir) {
@@ -54,9 +55,11 @@ static void set_chase_targets(void) {
         }
         ghosts[PINKY].target_tile = target_tile;
     }
+}
 
+static void set_inky_chase_target(void) {
     /* INKY */
-    if (ghosts[INKY].state != EXIT_HOUSE) {
+    if (ghosts[INKY].state != EXIT_HOUSE && ghosts[INKY].state != GO_HOME) {
         v2f_t ahead_vec = {0};
         switch (pacman.dir) {
             case RIGHT: ahead_vec.x =  2*TILE_SIZE; break;
@@ -85,17 +88,34 @@ static void set_chase_targets(void) {
         ghosts[INKY].target_tile = tile_at(target_pos);
         /* TODO(shaw): need to handle if the target tile wraps the board */
     }
+}
 
-    /* CLYDE */
-    if (ghosts[CLYDE].state != EXIT_HOUSE) {
+static void set_clyde_chase_target(void) {
+    if (ghosts[CLYDE].state != EXIT_HOUSE && ghosts[CLYDE].state != GO_HOME) {
         if (vec2f_dist(ghosts[CLYDE].pos, pacman.pos) > 8*TILE_SIZE)
             ghosts[CLYDE].target_tile = pacman.tile;
         else
             ghosts[CLYDE].target_tile = ghosts[CLYDE].scatter_target_tile;
     }
-
 }
 
+
+static void set_chase_targets(void) {
+    set_blinky_chase_target();
+    set_pinky_chase_target();
+    set_inky_chase_target();
+    set_clyde_chase_target();
+}
+
+static void set_chase_target(ghost_t *e) {
+    switch(e->c) {
+        case 'B': set_blinky_chase_target(); break;
+        case 'P': set_pinky_chase_target(); break;
+        case 'I': set_inky_chase_target(); break;
+        case 'C': set_clyde_chase_target(); break;
+        default: break;
+    }
+}
 
 void reverse_ghosts(void) {
     for (int i=0; i<GHOST_COUNT; ++i)
@@ -123,7 +143,7 @@ static void available_directions(ghost_t *e, bool options[4]) {
     for (int dir=0; dir<4; ++dir) {
         tile = get_adjacent_tile(e->tile, dir);
         options[dir] = !is_solid(board[tile]);
-        if (board[tile] == 'n' && dir == DOWN)
+        if (board[tile] == 'n' && dir == DOWN && e->state != GO_HOME)
             options[DOWN] = false;
         if (dir == UP && up_forbidden(tile))
             options[UP] = false;
@@ -153,14 +173,21 @@ void move_towards_target(ghost_t *e) {
 
     /* TODO(shaw): decrease ghost speed if travelling through tunnel */
 
+    float speed = e->speed;
+    if (e->state == GO_HOME)
+        speed *= 2;
+    else if (e->frightened)
+        speed *= 0.5;
+
     if (e->dir == LEFT && options[LEFT])
-        e->pos.x -= e->speed;
+        e->pos.x -= speed;
     else if (e->dir == RIGHT && options[RIGHT])
-        e->pos.x += e->speed;
+        e->pos.x += speed;
     else if (e->dir == UP && options[UP])
-        e->pos.y -= e->speed;
+        e->pos.y -= speed;
     else if (e->dir == DOWN && options[DOWN])
-        e->pos.y += e->speed;
+        e->pos.y += speed;
+
 
     /* movement through tunnel */
     if (e->pos.x < 0) {
@@ -198,7 +225,7 @@ void move_towards_target(ghost_t *e) {
         bool options[4]; 
         available_directions(e, options);
 
-        if (e->frightened) {
+        if (e->frightened && e->state != EXIT_HOUSE) {
             int dir;
             do {
                 dir = rand() % 4;
@@ -270,8 +297,15 @@ static void update_single_ghost(ghost_t *g) {
                 if (game.ghostmode == SCATTER)
                     g->target_tile = g->scatter_target_tile;
                 else if (game.ghostmode == CHASE)
-                    /* NOTE(shaw): only really need to set one target here, but probably doesn't matter */
-                    set_chase_targets();
+                    set_chase_target(g);
+            }
+            break;
+
+        case GO_HOME:
+            move_towards_target(g);
+            if (g->tile == g->target_tile) {
+                g->state = EXIT_HOUSE;
+                g->target_tile = GHOST_HOUSE_EXIT_TILE;
             }
             break;
 
@@ -292,8 +326,18 @@ void update_ghosts(void) {
 SDL_Rect ghost_animation_frame(ghost_t *ghost) {
     SDL_Rect rect;
 
+    if (ghost->state == GO_HOME) {
+        rect = hmget(tilemap, ghosts[PINKY].c);
+        rect.x += 8*ghosts[PINKY].w;
+        if (ghost->dir == LEFT)
+            rect.x += ghost->w;
+        else if (ghost->dir == UP)
+            rect.x += 2*ghost->w;
+        else if (ghost->dir == DOWN)
+            rect.x += 3*ghost->w;
+
     /* flee mode */
-    if (game.ghostmode == FLEE) {
+    } else if (ghost->frightened) {
         rect = hmget(tilemap, ghosts[BLINKY].c);
         rect.x += 8*ghosts[BLINKY].w;
         if (game.flee_timer <= 2*SEC_TO_USEC) {

@@ -92,6 +92,7 @@ typedef enum {
 typedef enum {
     HOUSE_PARTY,
     EXIT_HOUSE,
+    GO_HOME,
     NORMAL
 } ghost_state_e;
 
@@ -106,8 +107,7 @@ typedef struct {
     int tile;
     float speed;
     char c;            /* character that maps to my spritesheet location */
-    int target_tile;   /* the long term target tile i am heading towards */
-    int scatter_target_tile;
+    int target_tile, scatter_target_tile, respawn_tile;
     ghost_state_e state; 
     int64_t ghost_house_timer; 
     int64_t anim_timer, anim_frame_time;

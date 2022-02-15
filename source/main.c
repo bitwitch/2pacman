@@ -244,13 +244,22 @@ void restart_from_death(void) {
 static void check_ghost_collision(void) {
     if (pacman.dead) return;
     for (int i=0; i<GHOST_COUNT; ++i) {
-        if (pacman.tile == ghosts[i].tile) {
-            pacman.dead = true;
-            pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
-            pacman.anim_timer = pacman.anim_frame_time;
-            pacman.frame = 0;
-            if (--pacman.lives < 0)
-                game_over();
+        if (ghosts[i].state == GO_HOME) continue;
+        if (tile_at(pacman.pos) == ghosts[i].tile) {
+            if (ghosts[i].frightened) {
+                printf("GOTCHA!\n");
+                ghosts[i].target_tile = ghosts[i].respawn_tile;
+                ghosts[i].state = GO_HOME;
+                ghosts[i].frightened = false;
+            } else {
+                pacman.dead = true;
+                pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
+                pacman.anim_timer = pacman.anim_frame_time;
+                pacman.frame = 0;
+                if (--pacman.lives < 0)
+                    game_over();
+                break;
+            }
         }
     }
 }
