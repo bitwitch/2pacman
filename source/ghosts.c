@@ -168,6 +168,12 @@ static void available_directions(ghost_t *e, bool options[4]) {
 }
 
 void move_towards_target(ghost_t *e) {
+
+    if (game.ghost_eaten_timer > 0) {
+        if (e->state != GO_HOME || e->tile == tile_at(pacman.pos))
+            return;
+    }
+
     bool options[4]; 
     available_directions(e, options);
 
@@ -268,6 +274,9 @@ static void ghost_hover(ghost_t *g) {
 
 
 static void update_single_ghost(ghost_t *g) {
+    if (game.ghost_eaten_timer <= 0 && !g->show)
+        g->show = true;
+
     g->anim_timer -= TIME_STEP;
     if (g->anim_timer <= 0) {
         g->frame = g->frame ? 0 : 1;
@@ -335,6 +344,7 @@ SDL_Rect ghost_animation_frame(ghost_t *ghost) {
             rect.x += 2*ghost->w;
         else if (ghost->dir == DOWN)
             rect.x += 3*ghost->w;
+        return rect;
 
     /* flee mode */
     } else if (ghost->frightened) {

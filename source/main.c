@@ -173,7 +173,8 @@ void update_ghostmode() {
             break;
 
         case FLEE:
-            game.flee_timer -= TIME_STEP;
+            if (game.ghost_eaten_timer <= 0)
+                game.flee_timer -= TIME_STEP;
             if (game.flee_timer < 0) {
                 if (game.prev_ghostmode == SCATTER) {
                     set_scatter_targets();
@@ -184,6 +185,7 @@ void update_ghostmode() {
                     printf("[INFO] Chase mode activated\n");
                 }
                 frighten_ghosts(false);
+                game.ghosts_eaten = 0;
             }
             break;
 
@@ -232,6 +234,12 @@ static void game_over(void) {
     
 }
 
+static void show_eat_points(int ghosts_eaten, v2f_t pos) {
+    game.eat_points_sprite.show = true;
+    game.eat_points_sprite.pos = pos;
+    game.eat_points_sprite.srcrect.x = 372 + ghosts_eaten * game.eat_points_sprite.w;
+}
+
 void restart_from_death(void) {
     set_ghostmode_timer();
     game.intro_timer = 2 * SEC_TO_USEC;
@@ -251,6 +259,11 @@ static void check_ghost_collision(void) {
                 ghosts[i].target_tile = ghosts[i].respawn_tile;
                 ghosts[i].state = GO_HOME;
                 ghosts[i].frightened = false;
+                ghosts[i].show = false;
+                game.ghost_eaten_timer = 1*SEC_TO_USEC;
+                game.score += 200 * pow(2, game.ghosts_eaten);   /* 200, 400, 800, 1600 */ 
+                show_eat_points(game.ghosts_eaten, ghosts[i].pos);
+                ++game.ghosts_eaten;
             } else {
                 pacman.dead = true;
                 pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
@@ -264,6 +277,13 @@ static void check_ghost_collision(void) {
     }
 }
 
+static void update_eat_points(void) {
+    if (game.ghost_eaten_timer > 0)
+        game.ghost_eaten_timer -= TIME_STEP;
+    else if (game.eat_points_sprite.show)
+        game.eat_points_sprite.show = false;
+}
+
 void update(void) {
     do_input();
 
@@ -273,6 +293,7 @@ void update(void) {
         if (game.intro_timer > 0) {
             game.intro_timer -= TIME_STEP;
         } else {
+            update_eat_points();
             update_ghostmode();
             update_ghosts();
             update_2pac();
@@ -290,6 +311,11 @@ void init_game(void) {
     game.level = 1;
     set_ghostmode_timer();
     game.dots_remaining = DOT_COUNT;
+    game.eat_points_sprite.w = 16;
+    game.eat_points_sprite.h = 16;
+    game.eat_points_sprite.srcrect.y = 16;
+    game.eat_points_sprite.srcrect.w = 16;
+    game.eat_points_sprite.srcrect.h = 16;
     /* the rest of the fields should have been zero initialized, game = {0}; */
 }
 

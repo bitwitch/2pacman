@@ -61,6 +61,8 @@ void update_2pac(void) {
         if (pacman.death_timer < 0)
             update_dead_2pac();
         return;
+    } else if (game.ghost_eaten_timer > 0) {
+        return;
     }
 
     bool options[4];

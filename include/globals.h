@@ -54,15 +54,25 @@ typedef struct {
 } timer_t;
 
 typedef struct {
+    bool show;
+    v2f_t pos;
+    int w,h;
+    SDL_Rect srcrect;
+} points_sprite_t;
+
+typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
     timer_t timer;
+    points_sprite_t eat_points_sprite;
     bool up,down,left,right,enter;
     mode_e mode;
     ghostmode_e ghostmode, prev_ghostmode;
     int64_t ghostmode_timer;
     int64_t flee_timer;
     int64_t intro_timer;
+    int64_t ghost_eaten_timer;
+    int ghosts_eaten;   /* number eaten during this FLEE mode, used to calculate points */
     int level;
     int phase;
     bool quit;
@@ -102,6 +112,7 @@ typedef struct {
     int id;
     int w, h;
     int frame;
+    bool show;
     bool moving;
     bool reverse;
     bool frightened;

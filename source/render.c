@@ -67,9 +67,11 @@ void render_game(char *board, int board_size, float interp) {
     SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
 
     if (!(pacman.dead && pacman.death_timer < 0)) {
-        /* render entities */
+        /* render ghosts */
         for (int i=0; i<GHOST_COUNT; ++i) {
             ghost_t *ghost = &ghosts[i];
+
+            if (!ghost->show) continue;
 
             SDL_Rect srcrect = ghost_animation_frame(ghost);
             x = (int)(ghost->pos.x + 0.5) - TILE_SIZE;
@@ -93,6 +95,19 @@ void render_game(char *board, int board_size, float interp) {
             };
             SDL_RenderDrawRect(game.renderer, &tile_rect);
         }
+    }
+
+    if (game.eat_points_sprite.show) {
+        v2f_t pos = game.eat_points_sprite.pos;
+        int w = game.eat_points_sprite.w;
+        int h = game.eat_points_sprite.h;
+        SDL_Rect dstrect = {
+            .x = (pos.x - 0.5*w)*SCALE, 
+            .y = (pos.y - 0.5*h)*SCALE,
+            .w = w*SCALE,
+            .h = h*SCALE
+        };
+        SDL_RenderCopy(game.renderer, spritesheet, &game.eat_points_sprite.srcrect, &dstrect);
     }
 
     render_hud(interp);
