@@ -13,6 +13,7 @@ alphabet_t *alphabet_r = NULL;
 alphabet_t *alphabet_p = NULL;
 alphabet_t *alphabet_o = NULL;
 alphabet_t *alphabet_b = NULL;
+int ID_SCORE, ID_HIGH_SCORE;  /* id (index) of the score and high score in hud_items */
 
 void init_sdl(void) {
     int renderer_flags, window_flags;
@@ -370,7 +371,7 @@ void init_hud(void) {
     item->srcrects[2] = hmget(alphabet, 'p');
     item->rect_count = 3;
 
-    /* High Score */
+    /* High Score label*/
     item = &hud_items[count++];
     item->show = true;
     item->size = 8;
@@ -388,7 +389,23 @@ void init_hud(void) {
     item->srcrects[9] = hmget(alphabet, 'e');
     item->rect_count = 10;
 
+    /* High score */
+    ID_HIGH_SCORE = count;
+    item = &hud_items[count++];
+    item->show = true;
+    item->size = 8;
+    item->start_pos.x = 88.0f;
+    item->start_pos.y = 8.0f;
+    item->srcrects[0] = hmget(alphabet, ' ');
+    item->srcrects[1] = hmget(alphabet, ' ');
+    item->srcrects[2] = hmget(alphabet, ' ');
+    item->srcrects[3] = hmget(alphabet, ' ');
+    item->srcrects[4] = hmget(alphabet, '0');
+    item->srcrects[5] = hmget(alphabet, '0');
+    item->rect_count = 6;
+
     /* score */
+    ID_SCORE = count;
     item = &hud_items[count++];
     item->show = true;
     item->size = 8;

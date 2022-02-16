@@ -174,5 +174,8 @@ extern alphabet_t *alphabet_b;
 extern char board[BOARD_WIDTH*BOARD_HEIGHT];
 extern menu_intro_item_t menu_intro_items[MAX_INTRO_ITEMS];
 extern sprite_row_t hud_items[MAX_HUD_ITEMS];
+extern int ID_SCORE;      /* the id (index) of the score in the hud_items */
+extern int ID_HIGH_SCORE; /* the id (index) of the high score in the hud_items */
+extern int high_score;    /* the highest points scored */
 
 #endif

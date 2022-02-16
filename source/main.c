@@ -21,6 +21,9 @@ SDL_Texture *spritesheet;
 ghost_t ghosts[GHOST_COUNT] = {0};
 pacman_t pacman;
 
+/* TODO(shaw): persist the high score */
+int high_score = 0;
+
 /*
  * idea taken from doom source
  * https://github.com/id-Software/DOOM
@@ -105,6 +108,26 @@ static void set_ghostmode_timer(void) {
     else 
         game.ghostmode_timer = phases[2][game.phase] * SEC_TO_USEC;
 }
+
+static void update_hud(void) {
+    assert(game.score <= 999999);
+    int i = hud_items[ID_SCORE].rect_count - 1;
+    int n = game.score;
+    char c, digit;
+    while (n > 0) {
+        digit = (char)(n % 10);
+        c = digit + 48;
+        hud_items[ID_SCORE].srcrects[i--] = hmget(alphabet, c);
+        n /= 10;
+    }
+
+    if (high_score == game.score) {
+        memcpy(hud_items[ID_HIGH_SCORE].srcrects, 
+               hud_items[ID_SCORE].srcrects, 
+               sizeof(hud_items[ID_SCORE].srcrects));
+    }
+}
+
 
 static void update_main_menu(void) {
     if (game.intro_timer < 12 * SEC_TO_USEC) {
@@ -195,18 +218,25 @@ void update_ghostmode() {
     }
 }
 
+void score_points(int points) {
+    game.score += points;
+    if (game.score > high_score)
+        high_score = game.score;
+    update_hud();
+}
+
 void update_board(void) {
     if (board[pacman.tile] == '.') {
         board[pacman.tile] = ' ';
         --game.dots_remaining;
-        game.score += 10;
+        score_points(10);
     }
 
     static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
     if (board[pacman.tile] == '0') {
         board[pacman.tile] = ' ';
         --game.dots_remaining;
-        game.score += 50;
+        score_points(50);
         game.flee_timer = game.level > 18 ? 0 : flee_times[game.level-1]*SEC_TO_USEC;
         reverse_ghosts();
         frighten_ghosts(true);
@@ -231,7 +261,7 @@ void update_board(void) {
 }
 
 static void game_over(void) {
-    
+
 }
 
 static void show_eat_points(int ghosts_eaten, v2f_t pos) {
@@ -261,7 +291,7 @@ static void check_ghost_collision(void) {
                 ghosts[i].frightened = false;
                 ghosts[i].show = false;
                 game.ghost_eaten_timer = 1*SEC_TO_USEC;
-                game.score += 200 * pow(2, game.ghosts_eaten);   /* 200, 400, 800, 1600 */ 
+                score_points(200 * pow(2, game.ghosts_eaten));   /* 200, 400, 800, 1600 */ 
                 show_eat_points(game.ghosts_eaten, ghosts[i].pos);
                 ++game.ghosts_eaten;
             } else {
@@ -299,8 +329,8 @@ void update(void) {
             update_ghostmode();
             update_ghosts();
             update_2pac();
-            update_board();
             check_ghost_collision();
+            update_board();
         }
     }
 }
