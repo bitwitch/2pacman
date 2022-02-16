@@ -1,10 +1,10 @@
 # 2pacman
 
-I have been programming in c more lately so I wanted to write a game in it to
-practice and hopefully learn some things. I decided to make a pacman clone. For
-a game that seems simple on the surface it has a surprising amount of
-complexity and interesting subtleties. I highly recommend checking out The
-Pac-Man Dossier which has a ton of really interesting information about pacman.  
+I have been programming in c more lately so I wanted to write a game in it to  
+practice and hopefully learn some things. I decided to make a pacman clone. For  
+a game that seems simple on the surface it has a surprising amount of  
+complexity and interesting subtleties. I highly recommend checking out The  
+Pac-Man Dossier which has a ton of really interesting information about pacman.    
 
 ## Resources
 [The Pac-Man Dossier](https://pacman.holenet.info/) is amazing, it has everything you need to know about pacman.  
