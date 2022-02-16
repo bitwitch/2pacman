@@ -72,6 +72,8 @@ typedef struct {
     int64_t flee_timer;
     int64_t intro_timer;
     int64_t ghost_eaten_timer;
+    int64_t blink_timer;
+    int64_t blink_interval;
     int ghosts_eaten;   /* number eaten during this FLEE mode, used to calculate points */
     int level;
     int phase;

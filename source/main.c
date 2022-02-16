@@ -226,14 +226,15 @@ void score_points(int points) {
 }
 
 void update_board(void) {
+    static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
+
     if (board[pacman.tile] == '.') {
         board[pacman.tile] = ' ';
         --game.dots_remaining;
         score_points(10);
     }
 
-    static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
-    if (board[pacman.tile] == '0') {
+    else if (board[pacman.tile] == '0') {
         board[pacman.tile] = ' ';
         --game.dots_remaining;
         score_points(50);
@@ -309,6 +310,13 @@ static void check_ghost_collision(void) {
     }
 }
 
+
+static void update_blink_timer(void) {
+    game.blink_timer -= TIME_STEP;
+    if (game.blink_timer <= 0)
+        game.blink_timer = game.blink_interval;
+}
+
 static void update_eat_points(void) {
     if (game.ghost_eaten_timer > 0)
         game.ghost_eaten_timer -= TIME_STEP;
@@ -326,6 +334,7 @@ void update(void) {
             game.intro_timer -= TIME_STEP;
         } else {
             update_eat_points();
+            update_blink_timer();
             update_ghostmode();
             update_ghosts();
             update_2pac();
@@ -339,6 +348,8 @@ void init_game(void) {
     init_sdl();
     game.mode = MAIN_MENU;
     game.intro_timer = 12 * SEC_TO_USEC;
+    game.blink_interval = 0.25*SEC_TO_USEC;
+    game.blink_timer = game.blink_interval;
     game.ghostmode = SCATTER;
     game.level = 1;
     set_ghostmode_timer();

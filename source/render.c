@@ -48,15 +48,18 @@ void render_game(char *board, int board_size, float interp) {
     /* render board */
     int i, x, y;
     for (i=0; i<board_size; ++i) {
+        if (board[i] == '0' && game.blink_timer < game.blink_interval/2)
+            continue;
         x = i % BOARD_WIDTH;
         y = i / BOARD_WIDTH;
         SDL_Rect srcrect = hmget(tilemap, board[i]);
-        SDL_Rect dstrect = {.x = x*TILE_RENDER_SIZE, .y = y*TILE_RENDER_SIZE, .w = TILE_RENDER_SIZE, .h = TILE_RENDER_SIZE};
+        SDL_Rect dstrect = {
+            .x = x*TILE_RENDER_SIZE, 
+            .y = y*TILE_RENDER_SIZE, 
+            .w = TILE_RENDER_SIZE, 
+            .h = TILE_RENDER_SIZE
+        };
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
-        if (i == pacman.tile) {
-            SDL_SetRenderDrawColor(game.renderer, 0, 255, 0, 255);
-            SDL_RenderDrawRect(game.renderer, &dstrect);
-        }
     }
 
     /* render pacman */
