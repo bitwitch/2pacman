@@ -6,14 +6,14 @@
 #include "stb_ds.h"
 
 menu_intro_item_t menu_intro_items[MAX_INTRO_ITEMS];
-sprite_row_t hud_items[MAX_HUD_ITEMS];
+sprite_row_t hud_items[HUD_ITEM_COUNT];
 tilemap_t *tilemap = NULL;
 alphabet_t *alphabet   = NULL;
 alphabet_t *alphabet_r = NULL;
 alphabet_t *alphabet_p = NULL;
 alphabet_t *alphabet_o = NULL;
 alphabet_t *alphabet_b = NULL;
-int ID_SCORE, ID_HIGH_SCORE;  /* id (index) of the score and high score in hud_items */
+alphabet_t *alphabet_y = NULL;
 
 void init_sdl(void) {
     int renderer_flags, window_flags;
@@ -50,7 +50,7 @@ void init_sdl(void) {
  * example calculating chase targets 
  */
 
-void init_board(char *board) {
+void init_board() {
     assert(BOARD_WIDTH == 28 && BOARD_HEIGHT == 36 && "init_board must be updated if width or height changes");
     memset(board, 0, BOARD_WIDTH*BOARD_HEIGHT);
     int offset = 0;
@@ -353,15 +353,55 @@ void init_alphabet(void) {
     slash = (SDL_Rect){316, 200, 8, 8}; hmput(alphabet_b, '/', slash);
     quote = (SDL_Rect){324, 200, 8, 8}; hmput(alphabet_b, '"', quote);
 
+    a = (SDL_Rect){228, 208, 8, 8}; hmput(alphabet_y, 'a', a);
+    b = (SDL_Rect){236, 208, 8, 8}; hmput(alphabet_y, 'b', b);
+    c = (SDL_Rect){244, 208, 8, 8}; hmput(alphabet_y, 'c', c);
+    d = (SDL_Rect){252, 208, 8, 8}; hmput(alphabet_y, 'd', d);
+    e = (SDL_Rect){260, 208, 8, 8}; hmput(alphabet_y, 'e', e);
+    f = (SDL_Rect){268, 208, 8, 8}; hmput(alphabet_y, 'f', f);
+    g = (SDL_Rect){276, 208, 8, 8}; hmput(alphabet_y, 'g', g);
+    h = (SDL_Rect){284, 208, 8, 8}; hmput(alphabet_y, 'h', h);
+    i = (SDL_Rect){292, 208, 8, 8}; hmput(alphabet_y, 'i', i);
+    j = (SDL_Rect){300, 208, 8, 8}; hmput(alphabet_y, 'j', j);
+    k = (SDL_Rect){308, 208, 8, 8}; hmput(alphabet_y, 'k', k);
+    l = (SDL_Rect){316, 208, 8, 8}; hmput(alphabet_y, 'l', l);
+    m = (SDL_Rect){324, 208, 8, 8}; hmput(alphabet_y, 'm', m);
+    n = (SDL_Rect){332, 208, 8, 8}; hmput(alphabet_y, 'n', n);
+    o = (SDL_Rect){340, 208, 8, 8}; hmput(alphabet_y, 'o', o);
+    p = (SDL_Rect){348, 208, 8, 8}; hmput(alphabet_y, 'p', p);
+    q = (SDL_Rect){356, 208, 8, 8}; hmput(alphabet_y, 'q', q);
+    r = (SDL_Rect){364, 208, 8, 8}; hmput(alphabet_y, 'r', r);
+    s = (SDL_Rect){372, 208, 8, 8}; hmput(alphabet_y, 's', s);
+    t = (SDL_Rect){380, 208, 8, 8}; hmput(alphabet_y, 't', t);
+    u = (SDL_Rect){388, 208, 8, 8}; hmput(alphabet_y, 'u', u);
+    v = (SDL_Rect){396, 208, 8, 8}; hmput(alphabet_y, 'v', v);
+    w = (SDL_Rect){404, 208, 8, 8}; hmput(alphabet_y, 'w', w);
+    x = (SDL_Rect){412, 208, 8, 8}; hmput(alphabet_y, 'x', x);
+    y = (SDL_Rect){420, 208, 8, 8}; hmput(alphabet_y, 'y', y);
+    z = (SDL_Rect){428, 208, 8, 8}; hmput(alphabet_y, 'z', z);
+    zero  = (SDL_Rect){228, 216, 8, 8}; hmput(alphabet_y, '0', zero);
+    one   = (SDL_Rect){236, 216, 8, 8}; hmput(alphabet_y, '1', one);
+    two   = (SDL_Rect){244, 216, 8, 8}; hmput(alphabet_y, '2', two);
+    three = (SDL_Rect){252, 216, 8, 8}; hmput(alphabet_y, '3', three);
+    four  = (SDL_Rect){260, 216, 8, 8}; hmput(alphabet_y, '4', four);
+    five  = (SDL_Rect){268, 216, 8, 8}; hmput(alphabet_y, '5', five);
+    six   = (SDL_Rect){276, 216, 8, 8}; hmput(alphabet_y, '6', six);
+    seven = (SDL_Rect){284, 216, 8, 8}; hmput(alphabet_y, '7', seven);
+    eight = (SDL_Rect){292, 216, 8, 8}; hmput(alphabet_y, '8', eight);
+    nine  = (SDL_Rect){300, 216, 8, 8}; hmput(alphabet_y, '9', nine);
+    dash  = (SDL_Rect){308, 216, 8, 8}; hmput(alphabet_y, '-', dash);
+    slash = (SDL_Rect){316, 216, 8, 8}; hmput(alphabet_y, '/', slash);
+    quote = (SDL_Rect){324, 216, 8, 8}; hmput(alphabet_y, '"', quote);
+    SDL_Rect excl = {332, 216, 8, 8}; hmput(alphabet_y, '!', excl);
+
     SDL_Rect space = {0, 88, 8, 8};    hmput(alphabet, ' ', space);
 }
 
 void init_hud(void) {
-    int count = 0;
     sprite_row_t *item;
 
     /* 1UP */
-    item = &hud_items[count++];
+    item = &hud_items[ONE_UP];
     item->show = true;
     item->size = 8;
     item->start_pos.x = 24.0f;
@@ -372,7 +412,7 @@ void init_hud(void) {
     item->rect_count = 3;
 
     /* High Score label*/
-    item = &hud_items[count++];
+    item = &hud_items[HIGH_SCORE_LABEL];
     item->show = true;
     item->size = 8;
     item->start_pos.x = 72.0f;
@@ -390,8 +430,7 @@ void init_hud(void) {
     item->rect_count = 10;
 
     /* High score */
-    ID_HIGH_SCORE = count;
-    item = &hud_items[count++];
+    item = &hud_items[HIGH_SCORE];
     item->show = true;
     item->size = 8;
     item->start_pos.x = 88.0f;
@@ -405,8 +444,7 @@ void init_hud(void) {
     item->rect_count = 6;
 
     /* score */
-    ID_SCORE = count;
-    item = &hud_items[count++];
+    item = &hud_items[SCORE];
     item->show = true;
     item->size = 8;
     item->start_pos.x = 8.0f;
@@ -420,8 +458,8 @@ void init_hud(void) {
     item->rect_count = 6;
 
     /* credit 1 */
-    item = &hud_items[count++];
-    item->show = false;
+    item = &hud_items[CREDITS];
+    item->show = true;
     item->size = 8;
     item->start_pos.x = 24.0f;
     item->start_pos.y = BOARD_HEIGHT*TILE_SIZE - item->size;
@@ -437,32 +475,63 @@ void init_hud(void) {
     item->rect_count = 9;
 
     /* lives */
-    item = &hud_items[count++];
-    item->show = true;
+    item = &hud_items[LIFE1];
+    item->show = false;
     item->size = 16;
     item->start_pos.x = 24.0f;
     item->start_pos.y = BOARD_HEIGHT*TILE_SIZE - item->size;
     item->srcrects[0] = hmget(tilemap, '>');
     item->rect_count = 1;
 
-    item = &hud_items[count++];
-    item->show = true;
+    item = &hud_items[LIFE2];
+    item->show = false;
     item->size = 16;
     item->start_pos.x = 24.0f + item->size;
     item->start_pos.y = BOARD_HEIGHT*TILE_SIZE - item->size;
     item->srcrects[0] = hmget(tilemap, '>');
     item->rect_count = 1;
 
-    item = &hud_items[count++];
-    item->show = true;
+    item = &hud_items[LIFE3];
+    item->show = false;
     item->size = 16;
     item->start_pos.x = 24.0f + 2*item->size;
     item->start_pos.y = BOARD_HEIGHT*TILE_SIZE - item->size;
     item->srcrects[0] = hmget(tilemap, '>');
     item->rect_count = 1;
 
+    /* Ready */
+    item = &hud_items[READY];
+    item->show = false;
+    item->size = 8;
+    item->start_pos.x = 88.0;
+    item->start_pos.y = 160.0;
+    item->srcrects[0] = hmget(alphabet_y, 'r');
+    item->srcrects[1] = hmget(alphabet_y, 'e');
+    item->srcrects[2] = hmget(alphabet_y, 'a');
+    item->srcrects[3] = hmget(alphabet_y, 'd');
+    item->srcrects[4] = hmget(alphabet_y, 'y');
+    item->srcrects[5] = hmget(alphabet_y, '!');
+    item->rect_count = 6;
 
-    for (int i=0; i<count; ++i) {
+    /* Game Over */
+    item = &hud_items[GAME_OVER_LABEL];
+    item->show = false;
+    item->size = 8;
+    item->start_pos.x = 72.0;
+    item->start_pos.y = 160.0;
+    item->srcrects[0] = hmget(alphabet_r, 'g');
+    item->srcrects[1] = hmget(alphabet_r, 'a');
+    item->srcrects[2] = hmget(alphabet_r, 'm');
+    item->srcrects[3] = hmget(alphabet_r, 'e');
+    item->srcrects[4] = hmget(alphabet_r, ' ');
+    item->srcrects[5] = hmget(alphabet_r, ' ');
+    item->srcrects[6] = hmget(alphabet_r, 'o');
+    item->srcrects[7] = hmget(alphabet_r, 'v');
+    item->srcrects[8] = hmget(alphabet_r, 'e');
+    item->srcrects[9] = hmget(alphabet_r, 'r');
+    item->rect_count = 10;
+
+    for (int i=0; i<HUD_ITEM_COUNT; ++i) {
         item = &hud_items[i];
         for (int j=0; j<item->rect_count; ++j) {
             item->dstrects[j].x = (item->start_pos.x + j*item->size)*SCALE;
@@ -694,9 +763,32 @@ void init_menu_intro(void) {
 
 }
 
+void reset_pacman(void) {
+    pacman.pos.x = 111.0f;
+    pacman.pos.y = 212.0f;
+    pacman.tile = tile_at(pacman.pos);
+    pacman.dir = LEFT;
+    pacman.moving = true;
+    pacman.anim_timer = pacman.anim_frame_time;
+}
 
+void init_pacman(void) {
+    pacman.c = '<';
+    pacman.pos.x = 111.0f;
+    pacman.pos.y = 212.0f;
+    pacman.w = 16;
+    pacman.h = 16;
+    pacman.tile = tile_at(pacman.pos);
+    pacman.speed = 0.814159;
+    pacman.dir = LEFT;
+    pacman.moving = true;
+    pacman.lives = 3;
+    pacman.anim_frame_time = (int64_t)SEC_TO_USEC / 15;
+    pacman.anim_timer = pacman.anim_frame_time;
+    pacman.death_duration = 1;
+}
 
-void init_entities(void) {
+void init_ghosts(void) {
     float x,y;
     float speed = 0.814159;
 
@@ -756,21 +848,6 @@ void init_entities(void) {
     ghosts[CLYDE].state = HOUSE_PARTY;
     ghosts[CLYDE].scatter_target_tile = (BOARD_HEIGHT-1)*BOARD_WIDTH;
     ghosts[CLYDE].respawn_tile = 491;
-
-    x = 111.0f; y = 212.0f;
-    pacman.c = '<';
-    pacman.pos.x = x;
-    pacman.pos.y = y;
-    pacman.w = 16;
-    pacman.h = 16;
-    pacman.tile = tile_at(pacman.pos);
-    pacman.speed = speed;
-    pacman.dir = LEFT;
-    pacman.moving = true;
-    pacman.lives = 3;
-    pacman.anim_frame_time = (int64_t)SEC_TO_USEC / 15;
-    pacman.anim_timer = pacman.anim_frame_time;
-    pacman.death_duration = 1;
 }
 
 

@@ -15,6 +15,7 @@
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
+
 game_t game = {0};
 char board[BOARD_WIDTH*BOARD_HEIGHT] = {0};
 SDL_Texture *spritesheet;
@@ -89,58 +90,6 @@ void do_input(void) {
     }
 }
 
-static void set_ghostmode_timer(void) {
-    static float phases[3][8] = {
-       {7,20,7,20,5,20,5,-1},
-       {7,20,7,20,5,1033,1/60,-1},
-       {5,20,5,20,5,1037,1/60,-1},
-    };
-
-    if (game.phase > 8) {
-        printf("[WARNING] Game phase %d is greater than 7 and set_ghostmode_timer was called. There are only 8 phases.\n", game.phase);
-        return;
-    }
-
-    if (game.level == 1)
-        game.ghostmode_timer = phases[0][game.phase] * SEC_TO_USEC;
-    else if (game.level < 5)
-        game.ghostmode_timer = phases[1][game.phase] * SEC_TO_USEC;
-    else 
-        game.ghostmode_timer = phases[2][game.phase] * SEC_TO_USEC;
-}
-
-static void update_hud(void) {
-    assert(game.score <= 999999);
-    int i = hud_items[ID_SCORE].rect_count - 1;
-    int n = game.score;
-    char c, digit;
-    while (n > 0) {
-        digit = (char)(n % 10);
-        c = digit + 48;
-        hud_items[ID_SCORE].srcrects[i--] = hmget(alphabet, c);
-        n /= 10;
-    }
-
-    if (high_score == game.score) {
-        memcpy(hud_items[ID_HIGH_SCORE].srcrects, 
-               hud_items[ID_SCORE].srcrects, 
-               sizeof(hud_items[ID_SCORE].srcrects));
-    }
-}
-
-
-static void update_main_menu(void) {
-    if (game.intro_timer < 12 * SEC_TO_USEC) {
-
-    }
-
-    game.intro_timer -= TIME_STEP;
-    if (game.enter) {
-        game.mode = GAME;
-        game.intro_timer = 2 * SEC_TO_USEC;
-    }
-}
-
 /*
    Level 1
    Phase1. scatter for 7s
@@ -172,6 +121,61 @@ static void update_main_menu(void) {
    Phase7. scatter for .0166s
    Phase8. chase forever
 */
+
+static void set_ghostmode_timer(void) {
+    static float phases[3][8] = {
+       {7,20,7,20,5,20,5,-1},
+       {7,20,7,20,5,1033,1/60,-1},
+       {5,20,5,20,5,1037,1/60,-1},
+    };
+
+    if (game.phase > 8) {
+        printf("[WARNING] Game phase %d is greater than 7 and set_ghostmode_timer was called. There are only 8 phases.\n", game.phase);
+        return;
+    }
+
+    if (game.level == 1)
+        game.ghostmode_timer = phases[0][game.phase] * SEC_TO_USEC;
+    else if (game.level < 5)
+        game.ghostmode_timer = phases[1][game.phase] * SEC_TO_USEC;
+    else 
+        game.ghostmode_timer = phases[2][game.phase] * SEC_TO_USEC;
+}
+
+static void update_hud(void) {
+    assert(game.score <= 999999);
+    int i = hud_items[SCORE].rect_count - 1;
+    int n = game.score;
+    char c, digit;
+    while (n > 0) {
+        digit = (char)(n % 10);
+        c = digit + 48;
+        hud_items[SCORE].srcrects[i--] = hmget(alphabet, c);
+        n /= 10;
+    }
+
+    if (high_score == game.score) {
+        memcpy(hud_items[HIGH_SCORE].srcrects, 
+               hud_items[SCORE].srcrects, 
+               sizeof(hud_items[SCORE].srcrects));
+    }
+}
+
+
+static void update_main_menu(void) {
+    game.intro_timer -= TIME_STEP;
+    if (game.enter) {
+        game.mode = GET_READY;
+        game.intro_timer = game.get_ready_duration;
+        hud_items[READY].show = true;
+        hud_items[LIFE1].show = true;
+        hud_items[LIFE2].show = true;
+        hud_items[LIFE3].show = true;
+        hud_items[CREDITS].show = false;
+    }
+}
+
+
 void update_ghostmode() {
     switch (game.ghostmode) {
         case SCATTER: 
@@ -218,7 +222,7 @@ void update_ghostmode() {
     }
 }
 
-void score_points(int points) {
+static void score_points(int points) {
     game.score += points;
     if (game.score > high_score)
         high_score = game.score;
@@ -253,16 +257,13 @@ void update_board(void) {
         game.dots_remaining = DOT_COUNT;
         set_ghostmode_timer();
         game.intro_timer = 2 * SEC_TO_USEC;
-        init_board(board);
-        init_entities();
+        init_board();
+        init_ghosts();
+        reset_pacman();
         frighten_ghosts(false);
         game.ghostmode = SCATTER;
 
     }
-}
-
-static void game_over(void) {
-
 }
 
 static void show_eat_points(int ghosts_eaten, v2f_t pos) {
@@ -273,8 +274,11 @@ static void show_eat_points(int ghosts_eaten, v2f_t pos) {
 
 void restart_from_death(void) {
     set_ghostmode_timer();
-    game.intro_timer = 2 * SEC_TO_USEC;
-    init_entities();
+    game.intro_timer = game.get_ready_duration;
+    game.mode = GET_READY;
+    hud_items[READY].show = true;
+    init_ghosts();
+    reset_pacman();
     frighten_ghosts(false);
     game.ghostmode = SCATTER;
     pacman.dead = false;
@@ -301,8 +305,7 @@ static void check_ghost_collision(void) {
                 pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
                 pacman.anim_timer = pacman.anim_frame_time;
                 pacman.frame = 0;
-                if (--pacman.lives < 0)
-                    game_over();
+                --pacman.lives;
                 break;
 #endif
             }
@@ -310,6 +313,47 @@ static void check_ghost_collision(void) {
     }
 }
 
+static void update_get_ready(void) {
+    if (game.intro_timer == game.get_ready_duration) {
+        printf("lives: %d\n", pacman.lives);
+        if (pacman.lives == 3)
+            hud_items[LIFE3].show = false;
+        else if (pacman.lives == 2)
+            hud_items[LIFE2].show = false;
+        else if (pacman.lives == 1)
+            hud_items[LIFE1].show = false;
+    }
+
+    if (game.intro_timer > 0) {
+        game.intro_timer -= TIME_STEP;
+    } else {
+        hud_items[READY].show = false;
+        game.mode = GAME;
+    }
+}
+
+static void reset_game(void) {
+    game.mode = MAIN_MENU;
+    game.intro_timer = 12 * SEC_TO_USEC;
+    game.blink_timer = game.blink_interval;
+    game.ghostmode = SCATTER;
+    game.level = 1;
+    game.score = 0;
+    set_ghostmode_timer();
+    game.dots_remaining = DOT_COUNT;
+}
+
+static void update_game_over(void) {
+    game.intro_timer -= TIME_STEP;
+    if (game.intro_timer < 0) {
+        hud_items[GAME_OVER_LABEL].show = false;
+        hud_items[CREDITS].show = true;
+        init_board();
+        init_ghosts();
+        init_pacman();
+        reset_game();
+    }
+}
 
 static void update_blink_timer(void) {
     game.blink_timer -= TIME_STEP;
@@ -327,20 +371,28 @@ static void update_eat_points(void) {
 void update(void) {
     do_input();
 
-    if (game.mode == MAIN_MENU) {
-        update_main_menu();
-    } else {
-        if (game.intro_timer > 0) {
-            game.intro_timer -= TIME_STEP;
-        } else {
-            update_eat_points();
-            update_blink_timer();
-            update_ghostmode();
-            update_ghosts();
-            update_2pac();
-            check_ghost_collision();
-            update_board();
-        }
+    switch (game.mode) {
+    case MAIN_MENU: 
+        update_main_menu(); 
+        break;
+    case GET_READY: 
+        update_get_ready(); 
+        break;
+    case GAME: 
+        update_eat_points();
+        update_blink_timer();
+        update_ghostmode();
+        update_ghosts();
+        update_2pac();
+        check_ghost_collision();
+        update_board();
+        break;
+    case GAME_OVER: 
+        update_game_over();
+        break;
+    default:
+        assert(false && "unknown game mode in update");
+        break;
     }
 }
 
@@ -350,6 +402,8 @@ void init_game(void) {
     game.intro_timer = 12 * SEC_TO_USEC;
     game.blink_interval = 0.25*SEC_TO_USEC;
     game.blink_timer = game.blink_interval;
+    game.get_ready_duration = 2*SEC_TO_USEC;
+    game.game_over_duration = 4*SEC_TO_USEC;
     game.ghostmode = SCATTER;
     game.level = 1;
     set_ghostmode_timer();
@@ -370,10 +424,11 @@ int main(int argc, char **argv) {
 
     spritesheet = load_texture("assets/spritesheet.png");
 
-    init_board(board);
+    init_board();
     init_tilemap();
     init_alphabet();
-    init_entities();
+    init_ghosts();
+    init_pacman();
 
     init_hud();
     init_menu_intro();

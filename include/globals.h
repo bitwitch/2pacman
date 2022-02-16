@@ -38,8 +38,24 @@ enum {
 };
 
 typedef enum {
+    ONE_UP = 0,
+    HIGH_SCORE_LABEL,
+    HIGH_SCORE,
+    SCORE,
+    CREDITS,
+    LIFE1,
+    LIFE2,
+    LIFE3,
+    READY,
+    GAME_OVER_LABEL,
+    HUD_ITEM_COUNT
+} hud_item_e;
+
+typedef enum {
     MAIN_MENU,
-    GAME
+    GET_READY,
+    GAME,
+    GAME_OVER
 } mode_e;
 
 typedef enum {
@@ -74,6 +90,8 @@ typedef struct {
     int64_t ghost_eaten_timer;
     int64_t blink_timer;
     int64_t blink_interval;
+    int64_t get_ready_duration;
+    int64_t game_over_duration;
     int ghosts_eaten;   /* number eaten during this FLEE mode, used to calculate points */
     int level;
     int phase;
@@ -173,11 +191,11 @@ extern alphabet_t *alphabet_r;
 extern alphabet_t *alphabet_p;
 extern alphabet_t *alphabet_o;
 extern alphabet_t *alphabet_b;
+extern alphabet_t *alphabet_y;
 extern char board[BOARD_WIDTH*BOARD_HEIGHT];
 extern menu_intro_item_t menu_intro_items[MAX_INTRO_ITEMS];
-extern sprite_row_t hud_items[MAX_HUD_ITEMS];
-extern int ID_SCORE;      /* the id (index) of the score in the hud_items */
-extern int ID_HIGH_SCORE; /* the id (index) of the high score in the hud_items */
-extern int high_score;    /* the highest points scored */
+extern sprite_row_t hud_items[HUD_ITEM_COUNT];
+extern int high_score;
 
+/* the id (index) of corresponding item in hud_items */
 #endif
