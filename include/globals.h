@@ -51,7 +51,7 @@ typedef enum {
 typedef struct {
     uint64_t cur_time, prev_time;
     double delta, accumulator;
-} timer_t;
+} gametimer_t;
 
 typedef struct {
     bool show;
@@ -63,7 +63,7 @@ typedef struct {
 typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
-    timer_t timer;
+    gametimer_t timer;
     points_sprite_t eat_points_sprite;
     bool up,down,left,right,enter;
     mode_e mode;
