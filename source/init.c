@@ -94,7 +94,7 @@ void init_board() {
 }
 
 void init_tilemap(void) {
-    SDL_Rect none       = {0, 88, 8, 8};    hmput(tilemap, ' ', none);
+    SDL_Rect none       = {0, 81, 8, 8};    hmput(tilemap, ' ', none);
 
     SDL_Rect top_wall   = {8, 0, 8, 8};     hmput(tilemap, '^', top_wall);
     SDL_Rect bot_wall   = {8, 72, 8, 8};    hmput(tilemap, '_', bot_wall);
@@ -502,7 +502,7 @@ void init_hud(void) {
     item->show = true;
     item->size = 8;
     item->start_pos.x = 24.0f;
-    item->start_pos.y = BOARD_HEIGHT*TILE_SIZE - item->size;
+    item->start_pos.y = BOARD_HEIGHT*TILE_SIZE - item->size - 2;
     item->srcrects[0] = hmget(alphabet, 'c');
     item->srcrects[1] = hmget(alphabet, 'r');
     item->srcrects[2] = hmget(alphabet, 'e');
@@ -570,6 +570,21 @@ void init_hud(void) {
     item->srcrects[8] = hmget(alphabet_r, 'e');
     item->srcrects[9] = hmget(alphabet_r, 'r');
     item->rect_count = 10;
+
+    /* Bonus Items */
+    item = &hud_items[BONUS_ITEMS];
+    item->show = false;
+    item->size = 16;
+    item->start_pos.x = 100.0;
+    item->start_pos.y = BOARD_HEIGHT*TILE_SIZE - item->size;
+    item->srcrects[0] = hmget(tilemap, ' ');
+    item->srcrects[1] = hmget(tilemap, ' ');
+    item->srcrects[2] = hmget(tilemap, ' ');
+    item->srcrects[3] = hmget(tilemap, ' ');
+    item->srcrects[4] = hmget(tilemap, ' ');
+    item->srcrects[5] = hmget(tilemap, ' ');
+    item->srcrects[6] = hmget(tilemap, 'A');
+    item->rect_count = 7;
 
     for (int i=0; i<HUD_ITEM_COUNT; ++i) {
         item = &hud_items[i];

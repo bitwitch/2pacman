@@ -47,6 +47,7 @@ typedef enum {
     LIFE1,
     LIFE2,
     LIFE3,
+    BONUS_ITEMS,
     READY,
     GAME_OVER_LABEL,
     HUD_ITEM_COUNT

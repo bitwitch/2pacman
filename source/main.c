@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -51,7 +52,7 @@ void tick (void) {
 }
 
 
-void do_input(void) {
+static void do_input(void) {
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
@@ -174,6 +175,7 @@ static void update_main_menu(void) {
         hud_items[LIFE1].show = true;
         hud_items[LIFE2].show = true;
         hud_items[LIFE3].show = true;
+        hud_items[BONUS_ITEMS].show = true;
         hud_items[CREDITS].show = false;
     }
 }
@@ -259,7 +261,7 @@ void update_board(void) {
         printf("[INFO] Flee mode activated\n");
     }
 
-    if (game.dots_remaining == 0) {
+    if (game.dots_remaining == 0 || game.enter) {
         /* TODO(shaw): level completed */
         printf("Level %d completed!\n", game.level);
         ++game.level;
@@ -272,7 +274,20 @@ void update_board(void) {
         frighten_ghosts(false);
         game.ghostmode = SCATTER;
         set_scatter_targets();
-        game.current_bonus = bonuses[game.level-1];
+
+        game.current_bonus = game.level < BONUS_COUNT 
+            ? bonuses[game.level-1] 
+            : bonuses[BONUS_COUNT-1];
+
+        SDL_Rect *hud_bonus = hud_items[BONUS_ITEMS].srcrects;
+        if (game.level <= 7) {
+            hud_bonus[7-game.level] = hmget(tilemap, game.current_bonus.c);
+        } else {
+            for (int i=6; i>0; --i)
+                hud_bonus[i] = hud_bonus[i-1];
+            /*memmove(hud_bonus, hud_bonus+1, 6*sizeof(hud_bonus[0]));*/
+            hud_bonus[0] = hmget(tilemap, game.current_bonus.c);
+        }
     }
 }
 
@@ -447,6 +462,8 @@ void init_game(void) {
     game.current_bonus = bonuses[game.level-1];
     /* the rest of the fields should have been zero initialized, game = {0}; */
 }
+
+
 
 
 int main(int argc, char **argv) {
