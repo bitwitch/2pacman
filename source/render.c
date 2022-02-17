@@ -45,10 +45,10 @@ void render_game(char *board, int board_size, float interp) {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     SDL_RenderClear(game.renderer);
 
-    /* render board */
     int i, x, y;
+    /* render board */
     for (i=0; i<board_size; ++i) {
-        if (board[i] == '0' && game.blink_timer < game.blink_interval/2)
+        if (board[i] == ' ' || (board[i] == '0' && game.blink_timer < game.blink_interval/2))
             continue;
         x = i % BOARD_WIDTH;
         y = i / BOARD_WIDTH;
@@ -56,9 +56,25 @@ void render_game(char *board, int board_size, float interp) {
         SDL_Rect dstrect = {
             .x = x*TILE_RENDER_SIZE, 
             .y = y*TILE_RENDER_SIZE, 
-            .w = TILE_RENDER_SIZE, 
-            .h = TILE_RENDER_SIZE
+            .w = srcrect.w*SCALE, 
+            .h = srcrect.h*SCALE
         };
+        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+    }
+
+    /* render bonus */
+    if (game.current_bonus.show) {
+        bonus_t *bonus = &game.current_bonus;
+        x = (int)(bonus->pos.x + 0.5) - TILE_SIZE;
+        y = (int)(bonus->pos.y + 0.5) - TILE_SIZE;
+        SDL_Rect srcrect = hmget(tilemap, bonus->c);
+        SDL_Rect dstrect = {
+            .x = x*SCALE,
+            .y = y*SCALE, 
+            .w = srcrect.w*SCALE, 
+            .h = srcrect.h*SCALE
+        };
+
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
     }
 
@@ -66,7 +82,7 @@ void render_game(char *board, int board_size, float interp) {
     SDL_Rect srcrect = pacman_animation_frame();
     x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
     y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
-    SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
+    SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = srcrect.w*SCALE, .h = srcrect.h*SCALE};
     SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
 
     if (!(pacman.dead && pacman.death_timer < 0)) {
@@ -78,7 +94,7 @@ void render_game(char *board, int board_size, float interp) {
             SDL_Rect srcrect = ghost_animation_frame(ghost);
             x = (int)(ghost->pos.x + 0.5) - TILE_SIZE;
             y = (int)(ghost->pos.y + 0.5) - TILE_SIZE;
-            SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = 2*TILE_RENDER_SIZE, .h = 2*TILE_RENDER_SIZE};
+            SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = srcrect.w*SCALE, .h = srcrect.h*SCALE};
             SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
 
             /* TEMPORARILY DRAW THE TARGET TILES */
@@ -99,10 +115,11 @@ void render_game(char *board, int board_size, float interp) {
         }
     }
 
+    /* show points when you just eat a ghost */
     if (game.eat_points_sprite.show) {
         v2f_t pos = game.eat_points_sprite.pos;
-        int w = game.eat_points_sprite.w;
-        int h = game.eat_points_sprite.h;
+        int w = game.eat_points_sprite.srcrect.w;
+        int h = game.eat_points_sprite.srcrect.h;
         SDL_Rect dstrect = {
             .x = (pos.x - 0.5*w)*SCALE, 
             .y = (pos.y - 0.5*h)*SCALE,
@@ -111,6 +128,22 @@ void render_game(char *board, int board_size, float interp) {
         };
         SDL_RenderCopy(game.renderer, spritesheet, &game.eat_points_sprite.srcrect, &dstrect);
     }
+
+    /* show points when you just eat a bonus*/
+    if (game.show_bonus_points) {
+        v2f_t pos = game.current_bonus.pos;
+        SDL_Rect srcrect = game.current_bonus.points_sprite;
+        int w = srcrect.w;
+        int h = srcrect.h;
+        SDL_Rect dstrect = {
+            .x = (pos.x - 0.5*w)*SCALE, 
+            .y = (pos.y - 0.5*h)*SCALE,
+            .w = w*SCALE,
+            .h = h*SCALE
+        };
+        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+    }
+
 
     render_hud(interp);
 

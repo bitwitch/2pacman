@@ -13,6 +13,7 @@
 #define BOARD_HEIGHT 36
 
 #define DOT_COUNT 244
+#define BONUS_COUNT 13
 
 #define SCALE 3.5
 #define TILE_SIZE 8
@@ -72,15 +73,24 @@ typedef struct {
 typedef struct {
     bool show;
     v2f_t pos;
-    int w,h;
     SDL_Rect srcrect;
 } points_sprite_t;
+
+typedef struct {
+    bool show;
+    int points;
+    v2f_t pos;
+    SDL_Rect points_sprite;
+    char c;
+} bonus_t;
 
 typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
     gametimer_t timer;
     points_sprite_t eat_points_sprite;
+    bonus_t current_bonus;
+    bool show_bonus_points;
     bool up,down,left,right,enter;
     mode_e mode;
     ghostmode_e ghostmode, prev_ghostmode;
@@ -88,6 +98,7 @@ typedef struct {
     int64_t flee_timer;
     int64_t intro_timer;
     int64_t ghost_eaten_timer;
+    int64_t bonus_eaten_timer;
     int64_t blink_timer;
     int64_t blink_interval;
     int64_t get_ready_duration;
@@ -194,6 +205,7 @@ extern alphabet_t *alphabet_p;
 extern alphabet_t *alphabet_o;
 extern alphabet_t *alphabet_b;
 extern alphabet_t *alphabet_y;
+extern bonus_t bonuses[BONUS_COUNT];
 extern char board[BOARD_WIDTH*BOARD_HEIGHT];
 extern menu_intro_item_t menu_intro_items[MAX_INTRO_ITEMS];
 extern sprite_row_t hud_items[HUD_ITEM_COUNT];

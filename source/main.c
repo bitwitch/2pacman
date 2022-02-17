@@ -10,6 +10,8 @@
 #include "render.h"
 #include "init.h"
 
+#define INVINCIBLE
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -166,6 +168,7 @@ static void update_main_menu(void) {
     game.intro_timer -= TIME_STEP;
     if (game.enter) {
         game.mode = GET_READY;
+        game.current_bonus = bonuses[game.level-1];
         game.intro_timer = game.get_ready_duration;
         hud_items[READY].show = true;
         hud_items[LIFE1].show = true;
@@ -237,6 +240,10 @@ void update_board(void) {
         board[pacman.tile] = ' ';
         --game.dots_remaining;
         score_points(10);
+        if (game.dots_remaining == 70 || game.dots_remaining == 170) {
+            game.current_bonus.show = true;
+            /* TODO(shaw): set a timer for bonus to show */
+        }
     }
 
     else if (board[pacman.tile] == '0') {
@@ -265,20 +272,29 @@ void update_board(void) {
         frighten_ghosts(false);
         game.ghostmode = SCATTER;
         set_scatter_targets();
+        game.current_bonus = bonuses[game.level-1];
     }
 }
 
 static void show_eat_points(int ghosts_eaten, v2f_t pos) {
     game.eat_points_sprite.show = true;
     game.eat_points_sprite.pos = pos;
-    game.eat_points_sprite.srcrect.x = 372 + ghosts_eaten * game.eat_points_sprite.w;
+    game.eat_points_sprite.srcrect.x = 372 + ghosts_eaten * game.eat_points_sprite.srcrect.w;
+    game.ghost_eaten_timer = 1*SEC_TO_USEC;
 }
+
+static void show_bonus_points() {
+    game.show_bonus_points = true;
+    game.bonus_eaten_timer = 1*SEC_TO_USEC;
+}
+
 
 void restart_from_death(void) {
     set_ghostmode_timer();
     game.intro_timer = game.get_ready_duration;
     game.mode = GET_READY;
     hud_items[READY].show = true;
+    game.current_bonus.show = false;
     init_ghosts();
     reset_pacman();
     frighten_ghosts(false);
@@ -297,7 +313,6 @@ static void check_ghost_collision(void) {
                 ghosts[i].state = GO_HOME;
                 ghosts[i].frightened = false;
                 ghosts[i].show = false;
-                game.ghost_eaten_timer = 1*SEC_TO_USEC;
                 score_points(200 * pow(2, game.ghosts_eaten));   /* 200, 400, 800, 1600 */ 
                 show_eat_points(game.ghosts_eaten, ghosts[i].pos);
                 ++game.ghosts_eaten;
@@ -311,6 +326,12 @@ static void check_ghost_collision(void) {
                 break;
 #endif
             }
+        } else if (game.current_bonus.show && 
+                   tile_at(pacman.pos) == tile_at(game.current_bonus.pos)) 
+        {
+            score_points(game.current_bonus.points);
+            game.current_bonus.show = false;
+            show_bonus_points();
         }
     }
 }
@@ -331,6 +352,7 @@ static void update_get_ready(void) {
     } else {
         hud_items[READY].show = false;
         game.mode = GAME;
+        printf("[INFO] level %d\n", game.level);
     }
 }
 
@@ -341,6 +363,8 @@ static void reset_game(void) {
     game.ghostmode = SCATTER;
     set_scatter_targets();
     game.level = 1;
+    game.current_bonus = bonuses[game.level-1];
+    game.current_bonus.show = false;
     game.score = 0;
     set_ghostmode_timer();
     game.dots_remaining = DOT_COUNT;
@@ -369,6 +393,11 @@ static void update_eat_points(void) {
         game.ghost_eaten_timer -= TIME_STEP;
     else if (game.eat_points_sprite.show)
         game.eat_points_sprite.show = false;
+
+    if (game.bonus_eaten_timer > 0)
+        game.bonus_eaten_timer -= TIME_STEP;
+    else if (game.show_bonus_points)
+        game.show_bonus_points = false;
 }
 
 void update(void) {
@@ -412,17 +441,18 @@ void init_game(void) {
     game.full_speed = 1.26262626;
     set_ghostmode_timer();
     game.dots_remaining = DOT_COUNT;
-    game.eat_points_sprite.w = 16;
-    game.eat_points_sprite.h = 16;
     game.eat_points_sprite.srcrect.y = 16;
     game.eat_points_sprite.srcrect.w = 16;
     game.eat_points_sprite.srcrect.h = 16;
+    game.current_bonus = bonuses[game.level-1];
     /* the rest of the fields should have been zero initialized, game = {0}; */
 }
 
 
 int main(int argc, char **argv) {
     srand(0x94c3a2);
+
+    init_bonuses();
 
     init_game(); /* initializes global game object */
 

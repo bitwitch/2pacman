@@ -5,8 +5,9 @@
 #include "ghosts.h"
 #include "stb_ds.h"
 
-menu_intro_item_t menu_intro_items[MAX_INTRO_ITEMS];
-sprite_row_t hud_items[HUD_ITEM_COUNT];
+menu_intro_item_t menu_intro_items[MAX_INTRO_ITEMS] = {0};
+sprite_row_t hud_items[HUD_ITEM_COUNT] = {0};
+bonus_t bonuses[BONUS_COUNT] = {0};
 tilemap_t *tilemap = NULL;
 alphabet_t *alphabet   = NULL;
 alphabet_t *alphabet_r = NULL;
@@ -148,8 +149,47 @@ void init_tilemap(void) {
     SDL_Rect pinky  = {228, 80, 16, 16};  hmput(tilemap, 'P', pinky);
     SDL_Rect inky   = {228, 96, 16, 16};  hmput(tilemap, 'I', inky);
     SDL_Rect clyde  = {228, 112, 16, 16}; hmput(tilemap, 'C', clyde);
+
+    SDL_Rect cherry = {260, 48, 16, 16};  hmput(tilemap, 'A', cherry);
+    SDL_Rect berry  = {276, 48, 16, 16};  hmput(tilemap, 'S', berry);
+    SDL_Rect peach  = {292, 48, 16, 16};  hmput(tilemap, 'D', peach);
+    SDL_Rect apple  = {308, 48, 16, 16};  hmput(tilemap, 'F', apple);
+    SDL_Rect grape  = {324, 48, 16, 16};  hmput(tilemap, 'G', grape);
+    SDL_Rect galax  = {340, 48, 16, 16};  hmput(tilemap, 'H', galax);
+    SDL_Rect bell   = {356, 48, 16, 16};  hmput(tilemap, 'J', bell);
+    SDL_Rect key    = {372, 48, 16, 16};  hmput(tilemap, 'K', key);
+
     SDL_Rect pacman = {228, 0, 16, 16};  hmput(tilemap, '<', pacman);
     SDL_Rect pacman_left = {244, 16, 16, 16};  hmput(tilemap, '>', pacman_left);
+}
+
+void init_bonuses(void) {
+    bonuses[0]  = (bonus_t){.c = 'A', .points = 100,  .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){372, 32, 16, 16}};
+    bonuses[1]  = (bonus_t){.c = 'S', .points = 300,  .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){388, 32, 16, 16}};
+    bonuses[2]  = (bonus_t){.c = 'D', .points = 500,  .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){404, 32, 16, 16}};
+    bonuses[3]  = (bonus_t){.c = 'D', .points = 500,  .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){404, 32, 16, 16}};
+    bonuses[4]  = (bonus_t){.c = 'F', .points = 700,  .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 32, 16, 16}};
+    bonuses[5]  = (bonus_t){.c = 'F', .points = 700,  .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 32, 16, 16}};
+    bonuses[6]  = (bonus_t){.c = 'G', .points = 1000, .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 48, 22, 16}};
+    bonuses[7]  = (bonus_t){.c = 'G', .points = 1000, .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 48, 22, 16}};
+    bonuses[8]  = (bonus_t){.c = 'H', .points = 2000, .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 64, 22, 16}};
+    bonuses[9]  = (bonus_t){.c = 'H', .points = 2000, .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 64, 22, 16}};
+    bonuses[10] = (bonus_t){.c = 'J', .points = 3000, .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 80, 22, 16}};
+    bonuses[11] = (bonus_t){.c = 'J', .points = 3000, .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 80, 22, 16}};
+    bonuses[12] = (bonus_t){.c = 'K', .points = 5000, .pos = (v2f_t){111.0f, 163.0f},
+        .points_sprite = (SDL_Rect){420, 96, 22, 16}};
 }
 
 void init_alphabet(void) {
