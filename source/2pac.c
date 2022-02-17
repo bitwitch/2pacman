@@ -75,6 +75,11 @@ void update_2pac(void) {
         return;
     }
 
+    if (pacman.delay_frames > 0) {
+        --pacman.delay_frames;
+        return;
+    }
+
     bool options[4];
     available_directions(options);
 
@@ -108,14 +113,28 @@ void update_2pac(void) {
         pacman.anim_timer = pacman.anim_frame_time;
     }
 
+    /* calculate speed */
+    float mult;
+    int index = game.level-1;
+    if (index == 0)
+        mult = game.ghostmode == FLEE ? .9 : .8;
+    else if (index < 4)
+        mult = game.ghostmode == FLEE ? .95 : .9;
+    else if (index < 20)
+        mult = 1.0;
+    else 
+        mult = .9;
+
+    float speed = game.full_speed * mult;
+
     /* handle movement through the tunnel */
     if (pacman.pos.x < TILE_SIZE || pacman.pos.x > (BOARD_WIDTH-1)*TILE_SIZE) {
         if (pacman.dir == LEFT) { 
-            pacman.pos.x -= pacman.speed;
+            pacman.pos.x -= speed;
             pacman.moving = true;
         }
         else if (pacman.dir == RIGHT) {
-            pacman.pos.x += pacman.speed;
+            pacman.pos.x += speed;
             pacman.moving = true;
         }
 
@@ -132,7 +151,7 @@ void update_2pac(void) {
     pacman.target_tile = get_adjacent_tile(pacman.tile, pacman.dir);
     v2f_t target_tile_pos = get_tile_pos(pacman.target_tile);
     v2f_t dir_vec = vec2f_norm(vec2f_sub(target_tile_pos, pacman.pos));
-    pacman.pos = vec2f_add(pacman.pos, vec2f_scale(dir_vec, pacman.speed));
+    pacman.pos = vec2f_add(pacman.pos, vec2f_scale(dir_vec, speed));
 
     /* only enter a new tile when your center has crossed the center of the new tile */
     v2f_t cur_tile_pos = get_tile_pos(pacman.tile);

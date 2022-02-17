@@ -233,12 +233,14 @@ void update_board(void) {
     static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
 
     if (board[pacman.tile] == '.') {
+        pacman.delay_frames = 1;
         board[pacman.tile] = ' ';
         --game.dots_remaining;
         score_points(10);
     }
 
     else if (board[pacman.tile] == '0') {
+        pacman.delay_frames = 3;
         board[pacman.tile] = ' ';
         --game.dots_remaining;
         score_points(50);
@@ -262,7 +264,7 @@ void update_board(void) {
         reset_pacman();
         frighten_ghosts(false);
         game.ghostmode = SCATTER;
-
+        set_scatter_targets();
     }
 }
 
@@ -337,6 +339,7 @@ static void reset_game(void) {
     game.intro_timer = 12 * SEC_TO_USEC;
     game.blink_timer = game.blink_interval;
     game.ghostmode = SCATTER;
+    set_scatter_targets();
     game.level = 1;
     game.score = 0;
     set_ghostmode_timer();
@@ -406,6 +409,7 @@ void init_game(void) {
     game.game_over_duration = 4*SEC_TO_USEC;
     game.ghostmode = SCATTER;
     game.level = 1;
+    game.full_speed = 1.26262626;
     set_ghostmode_timer();
     game.dots_remaining = DOT_COUNT;
     game.eat_points_sprite.w = 16;

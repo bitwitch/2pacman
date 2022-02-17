@@ -98,6 +98,7 @@ typedef struct {
     bool quit;
     int dots_remaining;
     int score;
+    float full_speed;
 } game_t;
 
 /* used for hashmap from characters to tiles */
@@ -150,6 +151,7 @@ typedef struct {
     dir_e dir;
     int w, h;
     int frame;
+    int delay_frames;
     int lives;
     bool moving;
     bool dead;

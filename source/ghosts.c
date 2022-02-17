@@ -177,8 +177,37 @@ static void available_directions(ghost_t *e, bool options[4]) {
 
 }
 
-void move_towards_target(ghost_t *e) {
+static bool in_tunnel(ghost_t *g) {
+    return (g->tile >= 476 && g->tile <= 480) || 
+           (g->tile >= 499 && g->tile <= 503);
+}
 
+static float ghost_speed(ghost_t *g) {
+    float mult;
+    int index = game.level-1;
+
+    if (index > 3)
+        mult = g->frightened ? .6 : .95;
+    else if (index > 0)
+        mult = g->frightened ? .55 : .85;
+    else 
+        mult = g->frightened ? .50 : .75;
+
+    if (g->state == GO_HOME)
+        mult *= 2;
+    else if (in_tunnel(g)) {
+        if (index > 3)
+            mult = .4;
+        else if (index > 0)
+            mult = .45;
+        else 
+            mult = .5;
+    }
+
+    return game.full_speed * mult;
+}
+
+void move_towards_target(ghost_t *e) {
     if (game.ghost_eaten_timer > 0) {
         if (e->state != GO_HOME || e->tile == tile_at(pacman.pos))
             return;
@@ -187,13 +216,7 @@ void move_towards_target(ghost_t *e) {
     bool options[4]; 
     available_directions(e, options);
 
-    /* TODO(shaw): decrease ghost speed if travelling through tunnel */
-
-    float speed = e->speed;
-    if (e->state == GO_HOME)
-        speed *= 2;
-    else if (e->frightened)
-        speed *= 0.5;
+    float speed = ghost_speed(e);
 
     if (e->dir == LEFT && options[LEFT])
         e->pos.x -= speed;
@@ -203,7 +226,6 @@ void move_towards_target(ghost_t *e) {
         e->pos.y -= speed;
     else if (e->dir == DOWN && options[DOWN])
         e->pos.y += speed;
-
 
     /* movement through tunnel */
     if (e->pos.x < 0) {
@@ -216,7 +238,6 @@ void move_towards_target(ghost_t *e) {
             e->pos.x = -TILE_SIZE;
         return;
     }
-
 
     /* only enter a new tile when your center has crossed the center of the new tile */
     v2f_t cur_tile_pos = get_tile_pos(e->tile);
@@ -281,7 +302,6 @@ static void ghost_hover(ghost_t *g) {
             g->dir = g->dir == UP ? DOWN : UP;
     }
 }
-
 
 static void update_single_ghost(ghost_t *g) {
     if (game.ghost_eaten_timer <= 0 && !g->show)

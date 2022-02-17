@@ -779,6 +779,7 @@ void init_pacman(void) {
     pacman.w = 16;
     pacman.h = 16;
     pacman.tile = tile_at(pacman.pos);
+    /*pacman.speed = 0.814159;*/
     pacman.speed = 0.814159;
     pacman.dir = LEFT;
     pacman.moving = true;
