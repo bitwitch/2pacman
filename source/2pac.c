@@ -45,23 +45,28 @@ static void available_directions(bool options[4]) {
 
 }
 
-static void game_over(void) {
-    game.mode = GAME_OVER;
-    game.intro_timer = game.game_over_duration;
-    hud_items[GAME_OVER_LABEL].show = true;
-}
-
 static void update_dead_2pac(void) {
-    /* update animation frame */
-    pacman.anim_timer -= 0.5*TIME_STEP;
-    if (pacman.anim_timer <= 0) {
-        if (++pacman.frame > 11) {
-            if (pacman.lives == 0)
-                game_over();
-            else
-                restart_from_death();
+    if (!pacman.show) {
+        game.scene_timer -= TIME_STEP;
+        if (game.scene_timer < 0)
+            restart_from_death();
+    } else {
+        /* update animation frame */
+        pacman.anim_timer -= 0.5*TIME_STEP;
+        if (pacman.anim_timer <= 0) {
+            if (++pacman.frame > 10) {
+                if (pacman.lives == 0) {
+                    game.mode = GAME_OVER;
+                    game.scene_timer = game.game_over_duration;
+                    hud_items[GAME_OVER_LABEL].show = true;
+                    pacman.show = false;
+                } else {
+                    game.scene_timer = 1*SEC_TO_USEC;
+                    pacman.show = false;
+                } 
+            }
+            pacman.anim_timer = pacman.anim_frame_time;
         }
-        pacman.anim_timer = pacman.anim_frame_time;
     }
 }
 

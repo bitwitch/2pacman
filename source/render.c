@@ -105,11 +105,13 @@ void render_game(char *board, int board_size, float interp) {
     }
 
     /* render pacman */
-    SDL_Rect srcrect = pacman_animation_frame();
-    x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
-    y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
-    SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = srcrect.w*SCALE, .h = srcrect.h*SCALE};
-    SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+    if (pacman.show) {
+        SDL_Rect srcrect = pacman_animation_frame();
+        x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
+        y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
+        SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = srcrect.w*SCALE, .h = srcrect.h*SCALE};
+        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+    }
 
     if (!(pacman.dead && pacman.death_timer < 0)) {
         /* render ghosts */
@@ -123,6 +125,7 @@ void render_game(char *board, int board_size, float interp) {
             SDL_Rect dstrect = {.x = x*SCALE, .y = y*SCALE, .w = srcrect.w*SCALE, .h = srcrect.h*SCALE};
             SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
 
+#if 0
             /* TEMPORARILY DRAW THE TARGET TILES */
             switch (i) {
             case BLINKY: SDL_SetRenderDrawColor(game.renderer, 255, 0, 0, 255); break;
@@ -138,6 +141,7 @@ void render_game(char *board, int board_size, float interp) {
                 .h = TILE_RENDER_SIZE
             };
             SDL_RenderDrawRect(game.renderer, &tile_rect);
+#endif
         }
     }
 

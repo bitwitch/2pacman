@@ -168,6 +168,7 @@ typedef struct {
     int frame;
     int delay_frames;
     int lives;
+    bool show;
     bool moving;
     bool dead;
     int tile;

@@ -11,8 +11,6 @@
 #include "render.h"
 #include "init.h"
 
-#define INVINCIBLE
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -329,6 +327,8 @@ void restart_from_death(void) {
     frighten_ghosts(false);
     game.ghostmode = SCATTER;
     pacman.dead = false;
+    pacman.show = true;
+    pacman.frame = 0;
 }
 
 static void check_ghost_collision(void) {

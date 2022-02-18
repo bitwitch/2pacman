@@ -832,6 +832,7 @@ void reset_pacman(void) {
 
 void init_pacman(void) {
     pacman.c = '<';
+    pacman.show = true;
     pacman.pos.x = 111.0f;
     pacman.pos.y = 212.0f;
     pacman.w = 16;
@@ -842,8 +843,10 @@ void init_pacman(void) {
     pacman.dir = LEFT;
     pacman.moving = true;
     pacman.lives = 3;
+    pacman.frame = 0;
     pacman.anim_frame_time = (int64_t)SEC_TO_USEC / 15;
     pacman.anim_timer = pacman.anim_frame_time;
+    pacman.dead = false;
     pacman.death_duration = 1;
 }
 
