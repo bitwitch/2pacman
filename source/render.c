@@ -32,12 +32,37 @@ void render_menu(float interp) {
 
     for (int i=0; i<ARRAY_COUNT(menu_intro_items); ++i) {
         menu_intro_item_t *item = &menu_intro_items[i];
-        if (game.intro_timer < (int64_t)(item->start_time*SEC_TO_USEC))
+        if (game.scene_timer < (int64_t)(item->start_time*SEC_TO_USEC))
             draw_menu_item(item);
     }
 
     render_hud(interp);
                   
+    SDL_RenderPresent(game.renderer);
+}
+
+void render_level_completed(float interp) {
+    SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
+    SDL_RenderClear(game.renderer);
+
+    SDL_Rect srcrect, dstrect;
+
+    /* render board */
+    if (game.scene_timer > 1*SEC_TO_USEC) {
+        srcrect = game.completed_board;
+        dstrect = (SDL_Rect){.x = 0*SCALE, .y = 24*SCALE, .w = srcrect.w*SCALE, .h = srcrect.h*SCALE};
+        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+
+        /* render pacman */
+        srcrect = pacman_animation_frame();
+        int x = (int)(pacman.pos.x + 0.5) - TILE_SIZE;
+        int y = (int)(pacman.pos.y + 0.5) - TILE_SIZE;
+        dstrect = (SDL_Rect){.x = x*SCALE, .y = y*SCALE, .w = srcrect.w*SCALE, .h = srcrect.h*SCALE};
+        SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
+    }
+
+    render_hud(interp);
+
     SDL_RenderPresent(game.renderer);
 }
 
@@ -59,6 +84,7 @@ void render_game(char *board, int board_size, float interp) {
             .w = srcrect.w*SCALE, 
             .h = srcrect.h*SCALE
         };
+
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
     }
 
@@ -157,7 +183,7 @@ SDL_Texture *load_texture(char *filename) {
     unsigned char *texture_pixels;
     int color_format = STBI_rgb_alpha;
 
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", filename);
+    printf("[INFO] Loading %s\n", filename);
 
     texture_pixels = stbi_load(filename, &texture_width, &texture_height, NULL, color_format);
 
@@ -207,6 +233,7 @@ SDL_Texture *load_texture(char *filename) {
       stbi_image_free(texture_pixels);
       return NULL;
     }
+
 
     texture = SDL_CreateTextureFromSurface(game.renderer, surface);
 

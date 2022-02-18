@@ -166,11 +166,11 @@ static void update_hud(void) {
 
 
 static void update_main_menu(void) {
-    game.intro_timer -= TIME_STEP;
+    game.scene_timer -= TIME_STEP;
     if (game.enter) {
         game.mode = GET_READY;
         game.current_bonus = bonuses[game.level-1];
-        game.intro_timer = game.get_ready_duration;
+        game.scene_timer = game.get_ready_duration;
         hud_items[READY].show = true;
         hud_items[LIFE1].show = true;
         hud_items[LIFE2].show = true;
@@ -234,7 +234,43 @@ static void score_points(int points) {
     update_hud();
 }
 
-void update_board(void) {
+static void update_level_complete(void) {
+    if (game.blink_timer == game.blink_interval)
+        game.completed_board = hmget(tilemap, 'L');
+    else if (game.blink_timer < game.blink_interval/2)
+        game.completed_board = hmget(tilemap, 'W');
+
+    game.scene_timer -= TIME_STEP;
+    if (game.scene_timer < 0) {
+        ++game.level;
+        game.dots_remaining = DOT_COUNT;
+        set_ghostmode_timer();
+        game.scene_timer = 2 * SEC_TO_USEC;
+        init_board();
+        init_ghosts();
+        reset_pacman();
+        frighten_ghosts(false);
+        game.ghostmode = SCATTER;
+        set_scatter_targets();
+        game.mode = GET_READY;
+        hud_items[READY].show = true;
+
+        game.current_bonus = game.level < BONUS_COUNT 
+            ? bonuses[game.level-1] 
+            : bonuses[BONUS_COUNT-1];
+
+        SDL_Rect *hud_bonus = hud_items[BONUS_ITEMS].srcrects;
+        if (game.level <= 7) {
+            hud_bonus[7-game.level] = hmget(tilemap, game.current_bonus.c);
+        } else {
+            for (int i=6; i>0; --i)
+                hud_bonus[i] = hud_bonus[i-1];
+            hud_bonus[0] = hmget(tilemap, game.current_bonus.c);
+        }
+    }
+}
+
+static void update_board(void) {
     static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
 
     if (board[pacman.tile] == '.') {
@@ -262,32 +298,11 @@ void update_board(void) {
     }
 
     if (game.dots_remaining == 0 || game.enter) {
-        /* TODO(shaw): level completed */
-        printf("Level %d completed!\n", game.level);
-        ++game.level;
-        game.dots_remaining = DOT_COUNT;
-        set_ghostmode_timer();
-        game.intro_timer = 2 * SEC_TO_USEC;
-        init_board();
-        init_ghosts();
-        reset_pacman();
-        frighten_ghosts(false);
-        game.ghostmode = SCATTER;
-        set_scatter_targets();
-
-        game.current_bonus = game.level < BONUS_COUNT 
-            ? bonuses[game.level-1] 
-            : bonuses[BONUS_COUNT-1];
-
-        SDL_Rect *hud_bonus = hud_items[BONUS_ITEMS].srcrects;
-        if (game.level <= 7) {
-            hud_bonus[7-game.level] = hmget(tilemap, game.current_bonus.c);
-        } else {
-            for (int i=6; i>0; --i)
-                hud_bonus[i] = hud_bonus[i-1];
-            /*memmove(hud_bonus, hud_bonus+1, 6*sizeof(hud_bonus[0]));*/
-            hud_bonus[0] = hmget(tilemap, game.current_bonus.c);
-        }
+        printf("[INFO] Level %d completed!\n", game.level);
+        game.mode = LEVEL_COMPLETE;
+        game.scene_timer = game.level_complete_duration;
+        game.completed_board = hmget(tilemap, 'L');
+        game.blink_timer = game.blink_interval;
     }
 }
 
@@ -303,10 +318,9 @@ static void show_bonus_points() {
     game.bonus_eaten_timer = 1*SEC_TO_USEC;
 }
 
-
 void restart_from_death(void) {
     set_ghostmode_timer();
-    game.intro_timer = game.get_ready_duration;
+    game.scene_timer = game.get_ready_duration;
     game.mode = GET_READY;
     hud_items[READY].show = true;
     game.current_bonus.show = false;
@@ -352,8 +366,7 @@ static void check_ghost_collision(void) {
 }
 
 static void update_get_ready(void) {
-    if (game.intro_timer == game.get_ready_duration) {
-        printf("lives: %d\n", pacman.lives);
+    if (game.scene_timer == game.get_ready_duration) {
         if (pacman.lives == 3)
             hud_items[LIFE3].show = false;
         else if (pacman.lives == 2)
@@ -362,8 +375,8 @@ static void update_get_ready(void) {
             hud_items[LIFE1].show = false;
     }
 
-    if (game.intro_timer > 0) {
-        game.intro_timer -= TIME_STEP;
+    if (game.scene_timer > 0) {
+        game.scene_timer -= TIME_STEP;
     } else {
         hud_items[READY].show = false;
         game.mode = GAME;
@@ -373,7 +386,7 @@ static void update_get_ready(void) {
 
 static void reset_game(void) {
     game.mode = MAIN_MENU;
-    game.intro_timer = 12 * SEC_TO_USEC;
+    game.scene_timer = 12 * SEC_TO_USEC;
     game.blink_timer = game.blink_interval;
     game.ghostmode = SCATTER;
     set_scatter_targets();
@@ -386,8 +399,8 @@ static void reset_game(void) {
 }
 
 static void update_game_over(void) {
-    game.intro_timer -= TIME_STEP;
-    if (game.intro_timer < 0) {
+    game.scene_timer -= TIME_STEP;
+    if (game.scene_timer < 0) {
         hud_items[GAME_OVER_LABEL].show = false;
         hud_items[CREDITS].show = true;
         init_board();
@@ -434,6 +447,10 @@ void update(void) {
         check_ghost_collision();
         update_board();
         break;
+    case LEVEL_COMPLETE: 
+        update_level_complete();
+        update_blink_timer();
+        break;
     case GAME_OVER: 
         update_game_over();
         break;
@@ -446,11 +463,12 @@ void update(void) {
 void init_game(void) {
     init_sdl();
     game.mode = MAIN_MENU;
-    game.intro_timer = 12 * SEC_TO_USEC;
+    game.scene_timer = 12 * SEC_TO_USEC;
     game.blink_interval = 0.25*SEC_TO_USEC;
     game.blink_timer = game.blink_interval;
     game.get_ready_duration = 2*SEC_TO_USEC;
     game.game_over_duration = 4*SEC_TO_USEC;
+    game.level_complete_duration = 2.5*SEC_TO_USEC;
     game.ghostmode = SCATTER;
     game.level = 1;
     game.full_speed = 1.26262626;
@@ -460,10 +478,9 @@ void init_game(void) {
     game.eat_points_sprite.srcrect.w = 16;
     game.eat_points_sprite.srcrect.h = 16;
     game.current_bonus = bonuses[game.level-1];
+    game.completed_board = hmget(tilemap, 'L');
     /* the rest of the fields should have been zero initialized, game = {0}; */
 }
-
-
 
 
 int main(int argc, char **argv) {
@@ -499,6 +516,8 @@ int main(int argc, char **argv) {
 
         if (game.mode == MAIN_MENU)
             render_menu(interp);
+        else if (game.mode == LEVEL_COMPLETE)
+            render_level_completed(interp);
         else 
             render_game(board, BOARD_WIDTH*BOARD_HEIGHT, interp);
     }

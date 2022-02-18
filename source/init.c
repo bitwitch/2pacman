@@ -161,6 +161,9 @@ void init_tilemap(void) {
 
     SDL_Rect pacman = {228, 0, 16, 16};  hmput(tilemap, '<', pacman);
     SDL_Rect pacman_left = {244, 16, 16, 16};  hmput(tilemap, '>', pacman_left);
+
+    SDL_Rect board_blue  = {0, 0, 224, 248};   hmput(tilemap, 'L', board_blue);
+    SDL_Rect board_white = {452, 0, 224, 248}; hmput(tilemap, 'W', board_white);
 }
 
 void init_bonuses(void) {

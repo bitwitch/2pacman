@@ -57,6 +57,7 @@ typedef enum {
     MAIN_MENU,
     GET_READY,
     GAME,
+    LEVEL_COMPLETE,
     GAME_OVER
 } mode_e;
 
@@ -97,13 +98,14 @@ typedef struct {
     ghostmode_e ghostmode, prev_ghostmode;
     int64_t ghostmode_timer;
     int64_t flee_timer;
-    int64_t intro_timer;
+    int64_t scene_timer;
     int64_t ghost_eaten_timer;
     int64_t bonus_eaten_timer;
     int64_t blink_timer;
     int64_t blink_interval;
     int64_t get_ready_duration;
     int64_t game_over_duration;
+    int64_t level_complete_duration;
     int ghosts_eaten;   /* number eaten during this FLEE mode, used to calculate points */
     int level;
     int phase;
@@ -111,6 +113,7 @@ typedef struct {
     int dots_remaining;
     int score;
     float full_speed;
+    SDL_Rect completed_board;
 } game_t;
 
 /* used for hashmap from characters to tiles */
