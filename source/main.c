@@ -295,7 +295,7 @@ static void update_board(void) {
         printf("[INFO] Flee mode activated\n");
     }
 
-    if (game.dots_remaining == 0 || game.enter) {
+    if (game.dots_remaining == 0) {
         printf("[INFO] Level %d completed!\n", game.level);
         game.mode = LEVEL_COMPLETE;
         game.scene_timer = game.level_complete_duration;
