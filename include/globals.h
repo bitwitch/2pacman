@@ -95,7 +95,6 @@ typedef enum {
     DEATH_1,
     DEATH_2,
     GAME_START,
-    RETREAT,
     EAT_FRUIT,
     FLEE_MUSIC,
     MAIN_MUSIC,
