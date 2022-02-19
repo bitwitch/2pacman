@@ -374,6 +374,7 @@ static void do_collision(void) {
             } else {
 #ifndef INVINCIBLE
                 Mix_HaltChannel(main_channel);
+                main_channel = -1;
                 pacman.dead = true;
                 pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
                 pacman.anim_timer = pacman.anim_frame_time;
