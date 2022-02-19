@@ -9,6 +9,7 @@
 #include "ghosts.h"
 #include "2pac.h"
 #include "render.h"
+#include "sound.h"
 #include "init.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -22,6 +23,8 @@ char board[BOARD_WIDTH*BOARD_HEIGHT] = {0};
 SDL_Texture *spritesheet;
 ghost_t ghosts[GHOST_COUNT] = {0};
 pacman_t pacman;
+static int flee_channel = -1;
+static int main_channel = -1;
 
 /* TODO(shaw): persist the high score */
 int high_score = 0;
@@ -162,19 +165,29 @@ static void update_hud(void) {
     }
 }
 
+static void set_hud_lives(void) {
+    if (pacman.lives == 3)
+        hud_items[LIFE3].show = false;
+    else if (pacman.lives == 2)
+        hud_items[LIFE2].show = false;
+    else if (pacman.lives == 1)
+        hud_items[LIFE1].show = false;
+}
 
 static void update_main_menu(void) {
     game.scene_timer -= TIME_STEP;
     if (game.enter) {
+        Mix_PlayChannel(-1, game.samples[GAME_START], 0);
         game.mode = GET_READY;
         game.current_bonus = bonuses[game.level-1];
-        game.scene_timer = game.get_ready_duration;
+        game.scene_timer = game.game_start_duration;
         hud_items[READY].show = true;
         hud_items[LIFE1].show = true;
         hud_items[LIFE2].show = true;
         hud_items[LIFE3].show = true;
         hud_items[BONUS_ITEMS].show = true;
         hud_items[CREDITS].show = false;
+        set_hud_lives();
     }
 }
 
@@ -214,6 +227,9 @@ void update_ghostmode() {
                     game.ghostmode = CHASE;
                     printf("[INFO] Chase mode activated\n");
                 }
+                Mix_HaltChannel(flee_channel);
+                main_channel = Mix_PlayChannel(-1, game.samples[MAIN_MUSIC], -1);
+                flee_channel = -1;
                 frighten_ghosts(false);
                 game.ghosts_eaten = 0;
             }
@@ -270,8 +286,11 @@ static void update_level_complete(void) {
 
 static void update_board(void) {
     static int flee_times[18] = {6,5,4,3,2,5,2,2,1,5,2,1,1,3,1,1,0,1};
+    static sound_e munch_sound = MUNCH_1;
 
     if (board[pacman.tile] == '.') {
+        Mix_PlayChannel(-1, game.samples[munch_sound], 0);
+        munch_sound = munch_sound == MUNCH_1 ? MUNCH_2 : MUNCH_1;
         pacman.delay_frames = 1;
         board[pacman.tile] = ' ';
         --game.dots_remaining;
@@ -283,6 +302,11 @@ static void update_board(void) {
     }
 
     else if (board[pacman.tile] == '0') {
+        if (flee_channel == -1) {
+            Mix_HaltChannel(main_channel);
+            main_channel = -1;
+            flee_channel = Mix_PlayChannel(-1, game.samples[FLEE_MUSIC], -1);
+        }
         pacman.delay_frames = 3;
         board[pacman.tile] = ' ';
         --game.dots_remaining;
@@ -320,6 +344,7 @@ void restart_from_death(void) {
     set_ghostmode_timer();
     game.scene_timer = game.get_ready_duration;
     game.mode = GET_READY;
+    set_hud_lives();
     hud_items[READY].show = true;
     game.current_bonus.show = false;
     init_ghosts();
@@ -331,13 +356,14 @@ void restart_from_death(void) {
     pacman.frame = 0;
 }
 
-static void check_ghost_collision(void) {
+static void do_collision(void) {
     if (pacman.dead) return;
     for (int i=0; i<GHOST_COUNT; ++i) {
         if (ghosts[i].state == GO_HOME) 
             continue;
         if (tile_at(pacman.pos) == ghosts[i].tile) {
             if (ghosts[i].frightened) {
+                Mix_PlayChannel(-1, game.samples[EAT_GHOST], 0);
                 ghosts[i].target_tile = ghosts[i].respawn_tile;
                 ghosts[i].state = GO_HOME;
                 ghosts[i].frightened = false;
@@ -347,6 +373,7 @@ static void check_ghost_collision(void) {
                 ++game.ghosts_eaten;
             } else {
 #ifndef INVINCIBLE
+                Mix_HaltChannel(main_channel);
                 pacman.dead = true;
                 pacman.death_timer = pacman.death_duration*SEC_TO_USEC;
                 pacman.anim_timer = pacman.anim_frame_time;
@@ -358,6 +385,7 @@ static void check_ghost_collision(void) {
         } else if (game.current_bonus.show && 
                    tile_at(pacman.pos) == tile_at(game.current_bonus.pos)) 
         {
+            Mix_PlayChannel(-1, game.samples[EAT_FRUIT], 0);
             score_points(game.current_bonus.points);
             game.current_bonus.show = false;
             show_bonus_points();
@@ -366,20 +394,13 @@ static void check_ghost_collision(void) {
 }
 
 static void update_get_ready(void) {
-    if (game.scene_timer == game.get_ready_duration) {
-        if (pacman.lives == 3)
-            hud_items[LIFE3].show = false;
-        else if (pacman.lives == 2)
-            hud_items[LIFE2].show = false;
-        else if (pacman.lives == 1)
-            hud_items[LIFE1].show = false;
-    }
-
     if (game.scene_timer > 0) {
         game.scene_timer -= TIME_STEP;
     } else {
         hud_items[READY].show = false;
         game.mode = GAME;
+        if (main_channel == -1)
+            Mix_PlayChannel(main_channel, game.samples[MAIN_MUSIC], -1);
         printf("[INFO] level %d\n", game.level);
     }
 }
@@ -391,6 +412,7 @@ static void reset_game(void) {
     game.ghostmode = SCATTER;
     set_scatter_targets();
     game.level = 1;
+    game.just_started = true;
     game.current_bonus = bonuses[game.level-1];
     game.current_bonus.show = false;
     game.score = 0;
@@ -444,7 +466,7 @@ void update(void) {
         update_ghostmode();
         update_ghosts();
         update_2pac();
-        check_ghost_collision();
+        do_collision();
         update_board();
         break;
     case LEVEL_COMPLETE: 
@@ -466,11 +488,13 @@ void init_game(void) {
     game.scene_timer = 12 * SEC_TO_USEC;
     game.blink_interval = 0.25*SEC_TO_USEC;
     game.blink_timer = game.blink_interval;
+    game.game_start_duration = 5*SEC_TO_USEC;
     game.get_ready_duration = 2*SEC_TO_USEC;
     game.game_over_duration = 4*SEC_TO_USEC;
     game.level_complete_duration = 2.5*SEC_TO_USEC;
     game.ghostmode = SCATTER;
     game.level = 1;
+    game.just_started = true;
     game.full_speed = 1.26262626;
     set_ghostmode_timer();
     game.dots_remaining = DOT_COUNT;
@@ -489,6 +513,7 @@ int main(int argc, char **argv) {
     init_bonuses();
 
     init_game(); /* initializes global game object */
+    init_sound();
 
     spritesheet = load_texture("assets/spritesheet.png");
 

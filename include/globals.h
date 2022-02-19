@@ -30,6 +30,8 @@
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof(a[0]))
 
+typedef struct Mix_Chunk Mix_Chunk;
+
 enum {
     BLINKY = 0,
     PINKY,
@@ -86,9 +88,24 @@ typedef struct {
     char c;
 } bonus_t;
 
+typedef enum {
+    MUNCH_1 = 0,
+    MUNCH_2,
+    EAT_GHOST,
+    DEATH_1,
+    DEATH_2,
+    GAME_START,
+    RETREAT,
+    EAT_FRUIT,
+    FLEE_MUSIC,
+    MAIN_MUSIC,
+    SOUNDS_COUNT,
+} sound_e;
+
 typedef struct {
     SDL_Renderer *renderer;
     SDL_Window *window;
+    Mix_Chunk *samples[SOUNDS_COUNT];
     gametimer_t timer;
     points_sprite_t eat_points_sprite;
     bonus_t current_bonus;
@@ -103,6 +120,7 @@ typedef struct {
     int64_t bonus_eaten_timer;
     int64_t blink_timer;
     int64_t blink_interval;
+    int64_t game_start_duration;
     int64_t get_ready_duration;
     int64_t game_over_duration;
     int64_t level_complete_duration;
@@ -110,6 +128,7 @@ typedef struct {
     int level;
     int phase;
     bool quit;
+    bool just_started;
     int dots_remaining;
     int score;
     float full_speed;

@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "globals.h"
+#include "sound.h"
 #include "vecs.h"
 #include "stb_ds.h"
 
@@ -46,6 +47,7 @@ static void available_directions(bool options[4]) {
 }
 
 static void update_dead_2pac(void) {
+    static int death_channel;
     if (!pacman.show) {
         game.scene_timer -= TIME_STEP;
         if (game.scene_timer < 0)
@@ -54,6 +56,14 @@ static void update_dead_2pac(void) {
         /* update animation frame */
         pacman.anim_timer -= 0.5*TIME_STEP;
         if (pacman.anim_timer <= 0) {
+
+            if (pacman.frame == 0)
+                death_channel = Mix_PlayChannel(-1, game.samples[DEATH_1], 0);
+            if (pacman.frame == 10) {
+                Mix_HaltChannel(death_channel);
+                Mix_PlayChannel(death_channel, game.samples[DEATH_2], 1);
+            }
+
             if (++pacman.frame > 10) {
                 if (pacman.lives == 0) {
                     game.mode = GAME_OVER;
