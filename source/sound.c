@@ -11,7 +11,7 @@ static const char* wav_filenames[SOUNDS_COUNT] = {
     "assets/retreating.wav",   /* RETREAT */
     "assets/eat_fruit.wav",    /* EAT_FRUIT */
     "assets/flee_mode.wav",    /* FLEE_MUSIC */
-    "assets/pacman_music.wav", /* MAIN_MUSIC */
+    "assets/pacman_music.ogg", /* MAIN_MUSIC */
 };
 
 void init_sound(void) {
