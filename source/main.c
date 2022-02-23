@@ -325,6 +325,8 @@ static void update_board(void) {
         game.scene_timer = game.level_complete_duration;
         game.completed_board = hmget(tilemap, 'L');
         game.blink_timer = game.blink_interval;
+        Mix_HaltChannel(flee_channel);
+        flee_channel = -1;
     }
 }
 
