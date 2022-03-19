@@ -808,6 +808,32 @@ void init_menu_intro(void) {
     item->srcrects[7] = hmget(alphabet_o, '"');
     item->rect_count = 8;
 
+    /* Press Enter */
+    item = &menu_intro_items[count++];
+    item->blink = true;
+    item->start_time = 3.5f;
+    item->size = 8;
+    item->start_pos.x = 42.0;
+    item->start_pos.y = y_start + 5*16 + 5*12;
+    item->srcrects[0]  = hmget(alphabet, '-');
+    item->srcrects[1]  = hmget(alphabet, '-');
+    item->srcrects[2]  = hmget(alphabet, ' ');
+    item->srcrects[3]  = hmget(alphabet, 'p');
+    item->srcrects[4]  = hmget(alphabet, 'r');
+    item->srcrects[5]  = hmget(alphabet, 'e');
+    item->srcrects[6]  = hmget(alphabet, 's');
+    item->srcrects[7]  = hmget(alphabet, 's');
+    item->srcrects[8]  = hmget(alphabet, ' ');
+    item->srcrects[9]  = hmget(alphabet, 'e');
+    item->srcrects[10] = hmget(alphabet, 'n');
+    item->srcrects[11] = hmget(alphabet, 't');
+    item->srcrects[12] = hmget(alphabet, 'e');
+    item->srcrects[13] = hmget(alphabet, 'r');
+    item->srcrects[14] = hmget(alphabet, ' ');
+    item->srcrects[15] = hmget(alphabet, '-');
+    item->srcrects[16] = hmget(alphabet, '-');
+    item->rect_count = 17;
+
 
     for (int i=0; i<count; ++i) {
         item = &menu_intro_items[i];

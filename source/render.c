@@ -9,6 +9,8 @@
 extern SDL_Texture *spritesheet;
 
 static void draw_menu_item(menu_intro_item_t *item) {
+    if (item->blink && game.blink_timer < game.blink_interval/2)
+        return;
     for (int i=0; i<item->rect_count; ++i)
         SDL_RenderCopy(game.renderer, spritesheet, &(item->srcrects[i]), &(item->dstrects[i]));
 }

@@ -458,6 +458,7 @@ void update(void) {
 
     switch (game.mode) {
     case MAIN_MENU: 
+        update_blink_timer();
         update_main_menu(); 
         break;
     case GET_READY: 

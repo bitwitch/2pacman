@@ -26,7 +26,7 @@
 #define TIME_STEP ((int64_t)SEC_TO_USEC / (int64_t)TICRATE)  /* microseconds per frame */
 
 #define MAX_HUD_ITEMS 12
-#define MAX_INTRO_ITEMS 14
+#define MAX_INTRO_ITEMS 15
 
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof(a[0]))
 
@@ -199,6 +199,7 @@ typedef struct {
 
 typedef struct {
     bool show;
+    bool blink;
     float start_time;    /* in seconds */
     int size;
     v2f_t start_pos;
