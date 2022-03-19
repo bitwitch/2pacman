@@ -540,14 +540,12 @@ int main(int argc, char **argv) {
             game.timer.accumulator -= TIME_STEP;
         }
 
-        float interp = game.timer.accumulator / TIME_STEP;
-
         if (game.mode == MAIN_MENU)
-            render_menu(interp);
+            render_menu();
         else if (game.mode == LEVEL_COMPLETE)
-            render_level_completed(interp);
+            render_level_completed();
         else 
-            render_game(board, BOARD_WIDTH*BOARD_HEIGHT, interp);
+            render_game(board, BOARD_WIDTH*BOARD_HEIGHT);
     }
 
     return 0;
