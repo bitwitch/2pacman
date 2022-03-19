@@ -322,7 +322,6 @@ static void update_single_ghost(ghost_t *g) {
                 g->ghost_house_timer = 0;
                 g->state = EXIT_HOUSE;
                 g->target_tile = GHOST_HOUSE_EXIT_TILE;
-                printf("EXITING HOUSE\n");
             } else {
                 g->ghost_house_timer -= TIME_STEP;
             }
