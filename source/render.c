@@ -9,6 +9,8 @@
 extern SDL_Texture *spritesheet;
 
 static void draw_menu_item(menu_intro_item_t *item) {
+    if (item->blink && game.blink_timer < game.blink_interval/2)
+        return;
     for (int i=0; i<item->rect_count; ++i)
         SDL_RenderCopy(game.renderer, spritesheet, &(item->srcrects[i]), &(item->dstrects[i]));
 }
@@ -18,7 +20,7 @@ static void draw_hud_item(sprite_row_t *item) {
         SDL_RenderCopy(game.renderer, spritesheet, &(item->srcrects[i]), &(item->dstrects[i]));
 }
 
-static void render_hud(float interp) {
+static void render_hud(void) {
     for (int i=0; i<ARRAY_COUNT(hud_items); ++i) {
         sprite_row_t *item = &hud_items[i];
         if (item->show)
@@ -26,7 +28,7 @@ static void render_hud(float interp) {
     }
 }
 
-void render_menu(float interp) {
+void render_menu(void) {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     SDL_RenderClear(game.renderer);
 
@@ -36,12 +38,12 @@ void render_menu(float interp) {
             draw_menu_item(item);
     }
 
-    render_hud(interp);
+    render_hud();
                   
     SDL_RenderPresent(game.renderer);
 }
 
-void render_level_completed(float interp) {
+void render_level_completed() {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     SDL_RenderClear(game.renderer);
 
@@ -61,12 +63,12 @@ void render_level_completed(float interp) {
         SDL_RenderCopy(game.renderer, spritesheet, &srcrect, &dstrect);
     }
 
-    render_hud(interp);
+    render_hud();
 
     SDL_RenderPresent(game.renderer);
 }
 
-void render_game(char *board, int board_size, float interp) {
+void render_game(char *board, int board_size) {
     SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     SDL_RenderClear(game.renderer);
 
@@ -175,7 +177,7 @@ void render_game(char *board, int board_size, float interp) {
     }
 
 
-    render_hud(interp);
+    render_hud();
 
     SDL_RenderPresent(game.renderer);
 }

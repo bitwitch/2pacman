@@ -325,6 +325,8 @@ static void update_board(void) {
         game.scene_timer = game.level_complete_duration;
         game.completed_board = hmget(tilemap, 'L');
         game.blink_timer = game.blink_interval;
+        Mix_HaltChannel(flee_channel);
+        flee_channel = -1;
     }
 }
 
@@ -456,6 +458,7 @@ void update(void) {
 
     switch (game.mode) {
     case MAIN_MENU: 
+        update_blink_timer();
         update_main_menu(); 
         break;
     case GET_READY: 
@@ -538,14 +541,12 @@ int main(int argc, char **argv) {
             game.timer.accumulator -= TIME_STEP;
         }
 
-        float interp = game.timer.accumulator / TIME_STEP;
-
         if (game.mode == MAIN_MENU)
-            render_menu(interp);
+            render_menu();
         else if (game.mode == LEVEL_COMPLETE)
-            render_level_completed(interp);
+            render_level_completed();
         else 
-            render_game(board, BOARD_WIDTH*BOARD_HEIGHT, interp);
+            render_game(board, BOARD_WIDTH*BOARD_HEIGHT);
     }
 
     return 0;
